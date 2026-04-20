@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resolução de Exercícios | GEX1059 - Estatística Básica</title>
+  <style>
+    :root {
+      --panel: rgba(8, 24, 30, 0.9);
+      --panel-strong: rgba(9, 27, 33, 0.94);
+      --line: rgba(77, 226, 255, 0.24);
+      --text: #def4fb;
+      --text-soft: #9dc3cf;
+      --title: #f1fbff;
+      --cyan: #60e8ff;
+      --lime: #9dc95a;
+      --shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+      --glow: 0 0 0 1px rgba(96, 232, 255, 0.04), 0 0 18px rgba(24, 123, 149, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --shell-width: min(1380px, calc(100vw - 40px));
+      --font-body: "Segoe UI", Aptos, "Helvetica Neue", Arial, sans-serif;
+      --font-display: Bahnschrift, "Arial Narrow", "Segoe UI", sans-serif;
+      --font-mono: "Cascadia Mono", Consolas, "Courier New", monospace;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: var(--font-body);
+      background:
+        radial-gradient(circle at top left, rgba(14, 87, 105, 0.34), transparent 28%),
+        radial-gradient(circle at top right, rgba(28, 75, 63, 0.26), transparent 24%),
+        linear-gradient(160deg, #021116 0%, #03191f 52%, #041217 100%);
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      background:
+        linear-gradient(rgba(86, 196, 219, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(86, 196, 219, 0.035) 1px, transparent 1px);
+      background-size: 88px 88px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.42), transparent 88%);
+    }
+
+    body::after {
+      background:
+        linear-gradient(120deg, transparent 0 70%, rgba(157, 201, 90, 0.035) 100%),
+        radial-gradient(circle at 20% 20%, rgba(96, 232, 255, 0.12), transparent 16%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      width: var(--shell-width);
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(10, 31, 38, 0.9), rgba(6, 22, 27, 0.94)),
+        var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow), var(--glow);
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      pointer-events: none;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.78fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .hero-panel,
+    .summary-panel,
+    .exercise-card {
+      padding: 26px;
+    }
+
+    .hero-panel {
+      min-height: 100%;
+      background:
+        linear-gradient(140deg, rgba(9, 34, 41, 0.95), rgba(7, 22, 28, 0.92)),
+        var(--panel);
+    }
+
+    .eyebrow,
+    .mono-label,
+    .exercise-chip,
+    .hero-tag {
+      font-family: var(--font-mono);
+    }
+
+    .eyebrow,
+    .mono-label {
+      color: var(--cyan);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    .hero-panel h1,
+    .section-heading h2,
+    .exercise-header h3,
+    .chart-card h4 {
+      margin: 0;
+      font-family: var(--font-display);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero-panel h1 {
+      max-width: 12ch;
+      margin-top: 10px;
+      color: var(--title);
+      font-size: clamp(2.9rem, 6vw, 5.2rem);
+      line-height: 0.96;
+    }
+
+    .hero-band {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0 0;
+    }
+
+    .hero-tag {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(96, 232, 255, 0.16);
+      background: rgba(96, 232, 255, 0.04);
+      color: rgba(222, 244, 251, 0.9);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      transition: border-color 180ms ease, background 180ms ease, color 180ms ease;
+    }
+
+    .hero-tag:hover {
+      border-color: rgba(96, 232, 255, 0.28);
+      background: rgba(96, 232, 255, 0.06);
+      color: var(--text);
+    }
+
+    .submission-meta,
+    .quick-results article,
+    .note-panel,
+    .calc-block,
+    .result-panel,
+    .chart-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(96, 232, 255, 0.12);
+      background:
+        linear-gradient(180deg, rgba(12, 34, 41, 0.66), rgba(6, 23, 29, 0.8));
+    }
+
+    .submission-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .meta-card {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(96, 232, 255, 0.12);
+      background:
+        linear-gradient(180deg, rgba(12, 34, 41, 0.66), rgba(6, 23, 29, 0.8));
+    }
+
+    .meta-card strong {
+      display: block;
+      margin-top: 10px;
+      color: var(--title);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .meta-card-accent {
+      border-color: rgba(157, 201, 90, 0.18);
+      background:
+        linear-gradient(180deg, rgba(18, 35, 26, 0.5), rgba(7, 24, 28, 0.84));
+      color: var(--text);
+    }
+
+    .summary-panel {
+      position: sticky;
+      top: 20px;
+      display: grid;
+      gap: 14px;
+      background:
+        linear-gradient(180deg, rgba(8, 25, 31, 0.96), rgba(6, 21, 27, 0.94)),
+        var(--panel-strong);
+    }
+
+    .panel-heading {
+      display: grid;
+      gap: 8px;
+    }
+
+    .quick-results p,
+    .note-panel p,
+    .result-panel p {
+      margin: 0;
+      color: var(--text-soft);
+      line-height: 1.65;
+    }
+
+    .section-index {
+      display: grid;
+      gap: 10px;
+    }
+
+    .section-index a {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(96, 232, 255, 0.12);
+      background: rgba(7, 24, 30, 0.62);
+      transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .section-index a:hover,
+    .section-index a:focus-visible {
+      border-color: rgba(96, 232, 255, 0.24);
+      background: rgba(7, 24, 30, 0.74);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14);
+    }
+
+    .exercise-card:hover,
+    .chart-card:hover {
+      border-color: rgba(96, 232, 255, 0.18);
+      box-shadow: 0 16px 26px rgba(0, 0, 0, 0.18);
+    }
+
+    .index-number {
+      color: var(--lime);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      letter-spacing: 0.12em;
+    }
+
+    .index-copy {
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .quick-results {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-results article {
+      padding: 12px 14px;
+      background:
+        linear-gradient(180deg, rgba(10, 30, 37, 0.58), rgba(6, 23, 29, 0.76));
+    }
+
+    .quick-results strong {
+      color: var(--title);
+    }
+
+    .content {
+      display: grid;
+      gap: 26px;
+      margin-top: 38px;
+    }
+
+    .content-section {
+      display: grid;
+      gap: 22px;
+    }
+
+    .section-heading {
+      padding: 10px 6px 4px;
+    }
+
+    .section-heading h2 {
+      margin-top: 10px;
+      color: var(--title);
+      font-size: clamp(1.9rem, 3vw, 3rem);
+      line-height: 1;
+    }
+
+    .exercise-card {
+      display: grid;
+      gap: 22px;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+      scroll-margin-top: 28px;
+    }
+
+    .exercise-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .exercise-header h3 {
+      margin-top: 10px;
+      font-size: clamp(1.3rem, 2vw, 1.9rem);
+      line-height: 1.1;
+    }
+
+    .exercise-chip {
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(157, 201, 90, 0.18);
+      background: rgba(157, 201, 90, 0.06);
+      color: var(--lime);
+      letter-spacing: 0.1em;
+      font-size: 0.74rem;
+    }
+
+    .exercise-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(290px, 0.92fr);
+      gap: 20px;
+    }
+
+    .wide-layout {
+      grid-template-columns: minmax(0, 1.18fr) minmax(280px, 0.82fr);
+    }
+
+    .table-shell {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(96, 232, 255, 0.12);
+      background: rgba(6, 23, 29, 0.84);
+    }
+
+    .data-table {
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+    }
+
+    .data-table caption {
+      padding: 16px 18px 0;
+      color: var(--text-soft);
+      text-align: left;
+      font-size: 0.94rem;
+    }
+
+    .data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(96, 232, 255, 0.26);
+      background: linear-gradient(180deg, rgba(10, 33, 41, 1), rgba(8, 25, 32, 0.98));
+      color: var(--title);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+
+    .data-table tbody td,
+    .data-table tfoot td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(96, 232, 255, 0.08);
+      text-align: center;
+    }
+
+    .data-table tbody tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .data-table tbody td:first-child,
+    .data-table tfoot td:first-child {
+      text-align: left;
+    }
+
+    .data-table tfoot td {
+      background: rgba(96, 232, 255, 0.07);
+      color: var(--title);
+      font-weight: 700;
+    }
+
+    .highlight-row td {
+      background:
+        linear-gradient(90deg, rgba(157, 201, 90, 0.12), rgba(96, 232, 255, 0.04)) !important;
+      box-shadow: inset 3px 0 0 rgba(157, 201, 90, 0.68);
+    }
+
+    .analysis-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .note-panel,
+    .result-panel {
+      padding: 18px;
+    }
+
+    .note-panel-accent {
+      border-color: rgba(157, 201, 90, 0.18);
+      background:
+        linear-gradient(180deg, rgba(18, 35, 26, 0.48), rgba(7, 25, 29, 0.82));
+    }
+
+    .calc-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .calc-block {
+      padding: 18px;
+    }
+
+    .calc-block p {
+      margin: 10px 0 0;
+      color: var(--text-soft);
+      line-height: 1.65;
+    }
+
+    .calc-block code {
+      display: block;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(4, 17, 21, 0.78);
+      color: var(--title);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      white-space: normal;
+    }
+
+    .result-panel strong {
+      color: var(--title);
+    }
+
+    .chart-stage {
+      display: grid;
+      gap: 16px;
+    }
+
+    .chart-switcher {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .chart-toggle {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(96, 232, 255, 0.12);
+      background: rgba(7, 25, 31, 0.58);
+      color: var(--text-soft);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .chart-toggle:hover,
+    .chart-toggle:focus-visible {
+      border-color: rgba(96, 232, 255, 0.22);
+      background: rgba(10, 33, 39, 0.78);
+      color: var(--text);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+      outline: none;
+    }
+
+    .chart-toggle.is-active {
+      color: var(--title);
+      border-color: rgba(96, 232, 255, 0.24);
+      background: linear-gradient(180deg, rgba(12, 38, 45, 0.86), rgba(7, 27, 33, 0.88));
+      box-shadow: inset 0 0 0 1px rgba(96, 232, 255, 0.04), 0 10px 20px rgba(0, 0, 0, 0.14);
+    }
+
+    .chart-toggle-number {
+      color: var(--lime);
+      font-size: 0.74rem;
+    }
+
+    .chart-viewer {
+      display: grid;
+    }
+
+    .chart-card {
+      display: grid;
+      gap: 18px;
+      padding: 22px;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .chart-pane {
+      display: none;
+    }
+
+    .chart-pane.is-active {
+      display: grid;
+    }
+
+    .chart-card figcaption {
+      display: grid;
+      gap: 8px;
+    }
+
+    .chart-card h4 {
+      font-size: 1.12rem;
+      letter-spacing: 0.08em;
+    }
+
+    .chart-frame {
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(96, 232, 255, 0.1);
+      background: linear-gradient(180deg, rgba(7, 27, 33, 0.98), rgba(4, 18, 24, 0.98));
+    }
+
+    .chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-md);
+      background:
+        linear-gradient(180deg, rgba(8, 24, 30, 0.98), rgba(4, 18, 24, 0.98));
+      border: 1px solid rgba(96, 232, 255, 0.12);
+    }
+
+    .plot-backdrop {
+      fill: rgba(3, 16, 21, 0.5);
+      stroke: rgba(96, 232, 255, 0.06);
+      stroke-width: 1;
+    }
+
+    .axis {
+      stroke: rgba(222, 244, 251, 0.7);
+      stroke-width: 2;
+    }
+
+    .grid-line {
+      stroke: rgba(96, 232, 255, 0.12);
+      stroke-width: 1;
+    }
+
+    .bar {
+      fill: rgba(96, 232, 255, 0.72);
+      stroke: rgba(96, 232, 255, 0.9);
+      stroke-width: 1;
+    }
+
+    .hist-bar {
+      fill: rgba(18, 124, 151, 0.65);
+      stroke: rgba(96, 232, 255, 0.8);
+      stroke-width: 1;
+    }
+
+    .line-path {
+      fill: none;
+      stroke: rgba(96, 232, 255, 0.88);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .line-point {
+      fill: var(--lime);
+      stroke: rgba(4, 17, 21, 0.92);
+      stroke-width: 2;
+    }
+
+    .axis-label,
+    .tick-label,
+    .value-label,
+    .scale-label {
+      fill: var(--text);
+      font-family: var(--font-mono);
+    }
+
+    .axis-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-anchor: middle;
+    }
+
+    .axis-label-vertical {
+      transform: rotate(-90deg);
+      transform-origin: 34px 187px;
+    }
+
+    .tick-label {
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-anchor: middle;
+    }
+
+    .scale-label {
+      font-size: 0.74rem;
+      text-anchor: end;
+      dominant-baseline: middle;
+      opacity: 0.82;
+    }
+
+    .value-label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+
+    @media (max-width: 1180px) {
+      .masthead {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .summary-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .page-shell {
+        width: min(100vw - 28px, 100%);
+      }
+
+      .submission-meta,
+      .exercise-layout,
+      .wide-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      .page-shell {
+        width: min(100vw - 20px, 100%);
+        padding-top: 18px;
+      }
+
+      .hero-panel,
+      .summary-panel,
+      .exercise-card {
+        padding: 20px;
+      }
+
+      .hero-panel h1 {
+        max-width: none;
+      }
+
+      .submission-meta,
+      .quick-results {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .section-index {
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(220px, 1fr);
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .section-index a {
+        min-width: 220px;
+      }
+
+      .chart-switcher {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .chart-toggle {
+        flex: 0 0 auto;
+      }
+
+      .exercise-header {
+        flex-direction: column;
+        align-items: start;
+      }
+
+      .data-table {
+        min-width: 560px;
+      }
+    }
+
+    @page {
+      size: A4;
+      margin: 12mm;
+    }
+
+    @media print {
+      :root {
+        --panel: #ffffff;
+        --panel-strong: #ffffff;
+        --text: #16262d;
+        --text-soft: #4a5d66;
+        --title: #08181e;
+        --line: rgba(16, 101, 121, 0.3);
+        --shadow: none;
+        --glow: none;
+      }
+
+      html {
+        scroll-behavior: auto;
+      }
+
+      body {
+        color: var(--text);
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body::before,
+      body::after {
+        display: none !important;
+      }
+
+      .page-shell {
+        width: 100%;
+        padding: 0;
+      }
+
+      .masthead,
+      .submission-meta,
+      .exercise-layout,
+      .wide-layout,
+      .chart-viewer,
+      .summary-panel,
+      .quick-results {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .section-heading,
+      .exercise-header {
+        display: grid;
+      }
+
+      .panel,
+      .meta-card,
+      .quick-results article,
+      .note-panel,
+      .calc-block,
+      .result-panel,
+      .chart-card,
+      .chart-frame,
+      .table-shell {
+        background: #ffffff !important;
+        color: var(--text);
+        border-color: rgba(16, 101, 121, 0.22) !important;
+        box-shadow: none !important;
+      }
+
+      .panel::after {
+        display: none;
+      }
+
+      .summary-panel {
+        position: static;
+      }
+
+      .hero-panel,
+      .summary-panel,
+      .exercise-card,
+      .result-panel,
+      .note-panel,
+      .calc-block,
+      .chart-card,
+      .chart-frame,
+      .table-shell,
+      .content-section {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .hero-panel h1,
+      .section-heading h2,
+      .exercise-header h3,
+      .chart-card h4,
+      .meta-card strong,
+      .quick-results strong,
+      .result-panel strong {
+        color: var(--title) !important;
+      }
+
+      .eyebrow,
+      .mono-label,
+      .index-number {
+        color: #0d7389 !important;
+      }
+
+      .hero-tag,
+      .exercise-chip,
+      .section-index a,
+      .chart-toggle {
+        color: var(--text) !important;
+        background: #f3fafc !important;
+        border-color: rgba(16, 101, 121, 0.24) !important;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+
+      .note-panel-accent {
+        background: #f4f9ea !important;
+        border-color: rgba(111, 145, 33, 0.34) !important;
+      }
+
+      .stat-tile,
+      .matrix-cell {
+        background: #ffffff !important;
+      }
+
+      .stat-tile-accent strong {
+        color: #577b10 !important;
+      }
+
+      .data-table,
+      .table-shell {
+        min-width: 0 !important;
+      }
+
+      .data-table caption,
+      .quick-results p,
+      .note-panel p,
+      .result-panel p,
+      .calc-block p {
+        color: var(--text-soft) !important;
+      }
+
+      .data-table thead th {
+        position: static;
+        background: #eef7fa !important;
+        color: var(--title) !important;
+        border-bottom-color: rgba(16, 101, 121, 0.22) !important;
+      }
+
+      .data-table tbody td,
+      .data-table tfoot td {
+        border-bottom-color: rgba(16, 101, 121, 0.14) !important;
+      }
+
+      .data-table tbody tr:nth-child(even) td {
+        background: #fafcfd !important;
+      }
+
+      .data-table tfoot td {
+        background: #f0f8fb !important;
+      }
+
+      .highlight-row td {
+        background: linear-gradient(90deg, rgba(157, 201, 90, 0.18), rgba(96, 232, 255, 0.08)) !important;
+      }
+
+      .calc-block code {
+        background: #f6fbfc !important;
+        color: var(--title) !important;
+        border: 1px solid rgba(16, 101, 121, 0.18);
+      }
+
+      .chart-switcher {
+        display: none !important;
+      }
+
+      .chart-pane {
+        display: grid !important;
+      }
+
+      .chart {
+        background: #f7fbfd !important;
+        border-color: rgba(16, 101, 121, 0.18) !important;
+      }
+
+      .axis {
+        stroke: rgba(22, 38, 45, 0.72);
+      }
+
+      .grid-line {
+        stroke: rgba(16, 101, 121, 0.14);
+      }
+
+      .bar {
+        fill: rgba(31, 142, 171, 0.68);
+        stroke: rgba(12, 102, 122, 0.88);
+      }
+
+      .hist-bar {
+        fill: rgba(16, 101, 121, 0.54);
+        stroke: rgba(12, 102, 122, 0.8);
+      }
+
+      .line-path {
+        stroke: rgba(12, 102, 122, 0.88);
+      }
+
+      .line-point {
+        fill: #9bcb2e;
+        stroke: #f7fbfd;
+      }
+
+      .axis-label,
+      .tick-label,
+      .value-label,
+      .scale-label {
+        fill: #13262c;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead" id="topo">
+      <div class="hero-panel panel">
+        <p class="eyebrow">UFFS ERECHIM / GEX1059 - ESTATÍSTICA BÁSICA</p>
+        <h1>Resolução<br>Exercícios<br>Estatística<br>Básica</h1>
+
+        <div class="hero-band">
+          <div class="hero-tag">TENDÊNCIA CENTRAL</div>
+          <div class="hero-tag">DISTRIBUIÇÕES DE FREQUÊNCIA</div>
+        </div>
+
+        <div class="submission-meta">
+          <article class="meta-card">
+            <span class="mono-label">CURSO</span>
+            <strong>Ciência da Computação</strong>
+          </article>
+          <article class="meta-card">
+            <span class="mono-label">PROFESSOR</span>
+            <strong>Anibal Guedes</strong>
+          </article>
+          <article class="meta-card meta-card-accent">
+            <span class="mono-label">ALUNOS</span>
+            <strong>Carlos H. e Daniel T.</strong>
+          </article>
+        </div>
+      </div>
+
+      <aside class="summary-panel panel">
+        <div class="panel-heading">
+          <span class="mono-label">NAVEGAÇÃO</span>
+        </div>
+
+        <nav class="section-index" aria-label="Navegação por exercícios">
+          <a href="#ex-1-1">
+            <span class="index-number">01</span>
+            <span class="index-copy">Níveis de colesterol</span>
+          </a>
+          <a href="#ex-1-2">
+            <span class="index-number">02</span>
+            <span class="index-copy">Estatura de 40 alunos</span>
+          </a>
+          <a href="#ex-2-1">
+            <span class="index-number">03</span>
+            <span class="index-copy">Precipitações em 15 cidades</span>
+          </a>
+          <a href="#ex-2-2">
+            <span class="index-number">04</span>
+            <span class="index-copy">Análises granulométricas</span>
+          </a>
+        </nav>
+
+        <div class="quick-results">
+          <article>
+            <span class="mono-label">EX 1.1</span>
+            <p>Média <strong>222,44</strong> / Mediana <strong>218,57</strong> / Moda <strong>217,19</strong></p>
+          </article>
+          <article>
+            <span class="mono-label">EX 1.2</span>
+            <p>Média <strong>161,00</strong> / Mediana <strong>160,55</strong> / Moda <strong>159,60</strong></p>
+          </article>
+          <article>
+            <span class="mono-label">EX 2.1</span>
+            <p>Classe dominante <strong>39 |- 47 mm</strong> com <strong>Fi = 5</strong></p>
+          </article>
+          <article>
+            <span class="mono-label">EX 2.2</span>
+            <p>Maior concentração em <strong>4 |- 6 dias</strong> com <strong>Fi = 20</strong></p>
+          </article>
+        </div>
+      </aside>
+    </header>
+
+    <main class="content">
+      <section class="content-section" id="secao-1">
+        <div class="section-heading">
+          <div>
+            <span class="mono-label">SEÇÃO 01</span>
+            <h2>MÉDIA, MEDIANA E MODA</h2>
+          </div>
+        </div>
+
+        <article class="exercise-card panel" id="ex-1-1">
+          <div class="exercise-header">
+            <div>
+              <span class="mono-label">EXERCÍCIO 1.1</span>
+              <h3>Níveis de colesterol (mg/dl)</h3>
+            </div>
+            <div class="exercise-chip">n = 78</div>
+          </div>
+
+          <div class="exercise-layout">
+            <div class="table-shell">
+              <table class="data-table">
+                <caption>Tabela de classes, frequências e produto Xi · Fi</caption>
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Fi</th>
+                    <th>Xi</th>
+                    <th>Xi · Fi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>100 |- 150</td>
+                    <td>2</td>
+                    <td>125</td>
+                    <td>250</td>
+                  </tr>
+                  <tr>
+                    <td>150 |- 200</td>
+                    <td>24</td>
+                    <td>175</td>
+                    <td>4200</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td>200 |- 250</td>
+                    <td>35</td>
+                    <td>225</td>
+                    <td>7875</td>
+                  </tr>
+                  <tr>
+                    <td>250 |- 300</td>
+                    <td>14</td>
+                    <td>275</td>
+                    <td>3850</td>
+                  </tr>
+                  <tr>
+                    <td>300 |- 350</td>
+                    <td>1</td>
+                    <td>325</td>
+                    <td>325</td>
+                  </tr>
+                  <tr>
+                    <td>350 |- 400</td>
+                    <td>1</td>
+                    <td>375</td>
+                    <td>375</td>
+                  </tr>
+                  <tr>
+                    <td>400 |- 450</td>
+                    <td>0</td>
+                    <td>425</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <td>450 |- 500</td>
+                    <td>1</td>
+                    <td>475</td>
+                    <td>475</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td>78</td>
+                    <td>-</td>
+                    <td>17350</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="analysis-stack">
+              <div class="note-panel">
+                <span class="mono-label">INTUIÇÃO</span>
+                <p>
+                  A média usa todos os valores; a mediana localiza a posição central; a moda aponta
+                  a classe com maior frequência.
+                </p>
+              </div>
+
+              <div class="calc-panel">
+                <section class="calc-block">
+                  <span class="mono-label">MÉDIA</span>
+                  <p>&Sigma;(Xi · Fi) = 17.350 e n = 78</p>
+                  <code>x&#772; = &Sigma;(Xi · Fi) / n = 17.350 / 78 = 222,44 mg/dl</code>
+                </section>
+                <section class="calc-block">
+                  <span class="mono-label">MEDIANA</span>
+                  <p>n / 2 = 39; a 39ª observação cai na classe 200 |- 250.</p>
+                  <code>Me = 200 + ((39 - 26) / 35) · 50 = 218,57 mg/dl</code>
+                </section>
+                <section class="calc-block">
+                  <span class="mono-label">MODA</span>
+                  <p>A classe modal é 200 |- 250, pois possui a maior frequência.</p>
+                  <code>Mo = 200 + ((35 - 24) / ((35 - 24) + (35 - 14))) · 50 = 217,19 mg/dl</code>
+                </section>
+              </div>
+
+              <div class="result-panel">
+                <span class="mono-label">RESPOSTA FINAL</span>
+                <p>Média = <strong>222,44 mg/dl</strong>; Mediana = <strong>218,57 mg/dl</strong>; Moda = <strong>217,19 mg/dl</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="exercise-card panel" id="ex-1-2">
+          <div class="exercise-header">
+            <div>
+              <span class="mono-label">EXERCÍCIO 1.2</span>
+              <h3>Estatura de 40 alunos (cm)</h3>
+            </div>
+            <div class="exercise-chip">n = 40</div>
+          </div>
+
+          <div class="exercise-layout">
+            <div class="table-shell">
+              <table class="data-table">
+                <caption>Tabela de classes e medidas intermediárias</caption>
+                <thead>
+                  <tr>
+                    <th>Classe</th>
+                    <th>Fi</th>
+                    <th>Xi</th>
+                    <th>Xi · Fi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>150 |- 154</td>
+                    <td>4</td>
+                    <td>152</td>
+                    <td>608</td>
+                  </tr>
+                  <tr>
+                    <td>154 |- 158</td>
+                    <td>9</td>
+                    <td>156</td>
+                    <td>1404</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td>158 |- 162</td>
+                    <td>11</td>
+                    <td>160</td>
+                    <td>1760</td>
+                  </tr>
+                  <tr>
+                    <td>162 |- 166</td>
+                    <td>8</td>
+                    <td>164</td>
+                    <td>1312</td>
+                  </tr>
+                  <tr>
+                    <td>166 |- 170</td>
+                    <td>5</td>
+                    <td>168</td>
+                    <td>840</td>
+                  </tr>
+                  <tr>
+                    <td>170 |- 174</td>
+                    <td>3</td>
+                    <td>172</td>
+                    <td>516</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td>40</td>
+                    <td>-</td>
+                    <td>6440</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="analysis-stack">
+              <div class="calc-panel">
+                <section class="calc-block">
+                  <span class="mono-label">MÉDIA</span>
+                  <p>&Sigma;(Xi · Fi) = 6.440 e n = 40</p>
+                  <code>x&#772; = 6.440 / 40 = 161,00 cm</code>
+                </section>
+                <section class="calc-block">
+                  <span class="mono-label">MEDIANA</span>
+                  <p>n / 2 = 20; a 20ª observação cai na classe 158 |- 162.</p>
+                  <code>Me = 158 + ((20 - 13) / 11) · 4 = 160,55 cm</code>
+                </section>
+                <section class="calc-block">
+                  <span class="mono-label">MODA</span>
+                  <p>A classe modal é 158 |- 162, pois tem a maior frequência.</p>
+                  <code>Mo = 158 + (2 / 5) · 4 = 159,60 cm</code>
+                </section>
+              </div>
+
+              <div class="result-panel">
+                <span class="mono-label">RESPOSTA FINAL</span>
+                <p>Média = <strong>161,00 cm</strong>; Mediana = <strong>160,55 cm</strong>; Moda = <strong>159,60 cm</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-section" id="secao-2">
+        <div class="section-heading">
+          <div>
+            <span class="mono-label">SEÇÃO 02</span>
+            <h2>DISTRIBUIÇÕES DE FREQUÊNCIA</h2>
+          </div>
+        </div>
+
+        <article class="exercise-card panel" id="ex-2-1">
+          <div class="exercise-header">
+            <div>
+              <span class="mono-label">EXERCÍCIO 2.1</span>
+              <h3>Precipitações (mm) em 15 cidades</h3>
+            </div>
+            <div class="exercise-chip">k ≈ 5 / h = 8</div>
+          </div>
+
+          <div class="exercise-layout wide-layout">
+            <div class="table-shell">
+              <table class="data-table">
+                <caption>Distribuição de frequência para precipitações</caption>
+                <thead>
+                  <tr>
+                    <th>Classe (mm)</th>
+                    <th>Fi</th>
+                    <th>Fia</th>
+                    <th>Fr (%)</th>
+                    <th>Fra (%)</th>
+                    <th>Xi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>15 |- 23</td>
+                    <td>3</td>
+                    <td>3</td>
+                    <td>20,0</td>
+                    <td>20,0</td>
+                    <td>19</td>
+                  </tr>
+                  <tr>
+                    <td>23 |- 31</td>
+                    <td>4</td>
+                    <td>7</td>
+                    <td>26,7</td>
+                    <td>46,7</td>
+                    <td>27</td>
+                  </tr>
+                  <tr>
+                    <td>31 |- 39</td>
+                    <td>2</td>
+                    <td>9</td>
+                    <td>13,3</td>
+                    <td>60,0</td>
+                    <td>35</td>
+                  </tr>
+                  <tr class="highlight-row">
+                    <td>39 |- 47</td>
+                    <td>5</td>
+                    <td>14</td>
+                    <td>33,3</td>
+                    <td>93,3</td>
+                    <td>43</td>
+                  </tr>
+                  <tr>
+                    <td>47 |- 55</td>
+                    <td>1</td>
+                    <td>15</td>
+                    <td>6,7</td>
+                    <td>100,0</td>
+                    <td>51</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td>15</td>
+                    <td>-</td>
+                    <td>100,0</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="analysis-stack">
+              <div class="note-panel">
+                <span class="mono-label">DADOS ORIGINAIS</span>
+                <p>35, 26, 39, 25, 39, 21, 40, 16, 32, 39, 23, 15, 27, 44, 50.</p>
+              </div>
+
+              <div class="note-panel note-panel-accent">
+                <span class="mono-label">CRITÉRIO DE AGRUPAMENTO</span>
+                <p>
+                  Como o enunciado não fixava as classes, foi adotado um agrupamento em 5 classes,
+                  usando a regra de Sturges como referência. Para cobrir o valor máximo 50 sem
+                  ambiguidade, foi usada amplitude de classe 8.
+                </p>
+              </div>
+
+              <div class="result-panel">
+                <span class="mono-label">LEITURA RÁPIDA</span>
+                <p>A classe com maior frequência foi <strong>39 |- 47 mm</strong>, com <strong>Fi = 5</strong>.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-stage" data-chart-group="precipitacoes">
+            <div class="chart-switcher" role="tablist" aria-label="Selecionar gráfico do exercício 2.1">
+              <button class="chart-toggle is-active" type="button" role="tab" aria-selected="true" aria-controls="chart-precip-bars" id="tab-chart-precip-bars" data-chart-group="precipitacoes" data-chart-target="chart-precip-bars">
+                <span class="chart-toggle-number">01</span> Colunas
+              </button>
+              <button class="chart-toggle" type="button" role="tab" aria-selected="false" aria-controls="chart-precip-hist" id="tab-chart-precip-hist" data-chart-group="precipitacoes" data-chart-target="chart-precip-hist">
+                <span class="chart-toggle-number">02</span> Histograma
+              </button>
+              <button class="chart-toggle" type="button" role="tab" aria-selected="false" aria-controls="chart-precip-line" id="tab-chart-precip-line" data-chart-group="precipitacoes" data-chart-target="chart-precip-line">
+                <span class="chart-toggle-number">03</span> Linha acumulada
+              </button>
+            </div>
+
+            <div class="chart-viewer">
+              <figure class="chart-card chart-pane is-active" id="chart-precip-bars" role="tabpanel" aria-labelledby="tab-chart-precip-bars" data-chart-group="precipitacoes">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 01</span>
+                    <h4>Colunas (Fi)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Gráfico de colunas da frequência absoluta das precipitações">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="272" x2="706" y2="272" class="grid-line"></line>
+                    <line x1="106" y1="215" x2="706" y2="215" class="grid-line"></line>
+                    <line x1="106" y1="159" x2="706" y2="159" class="grid-line"></line>
+                    <line x1="106" y1="102" x2="706" y2="102" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="272" class="scale-label">1</text>
+                    <text x="92" y="215" class="scale-label">2</text>
+                    <text x="92" y="159" class="scale-label">3</text>
+                    <text x="92" y="102" class="scale-label">4</text>
+                    <text x="92" y="46" class="scale-label">5</text>
+                    <rect x="130" y="159" width="72" height="169" rx="4" class="bar"></rect>
+                    <rect x="250" y="102" width="72" height="226" rx="4" class="bar"></rect>
+                    <rect x="370" y="215" width="72" height="113" rx="4" class="bar"></rect>
+                    <rect x="490" y="46" width="72" height="282" rx="4" class="bar"></rect>
+                    <rect x="610" y="272" width="72" height="56" rx="4" class="bar"></rect>
+                    <text x="166" y="143" class="value-label">3</text>
+                    <text x="286" y="86" class="value-label">4</text>
+                    <text x="406" y="199" class="value-label">2</text>
+                    <text x="526" y="30" class="value-label">5</text>
+                    <text x="646" y="256" class="value-label">1</text>
+                    <text x="166" y="350" class="tick-label">15 |- 23</text>
+                    <text x="286" y="350" class="tick-label">23 |- 31</text>
+                    <text x="406" y="350" class="tick-label">31 |- 39</text>
+                    <text x="526" y="350" class="tick-label">39 |- 47</text>
+                    <text x="646" y="350" class="tick-label">47 |- 55</text>
+                    <text x="406" y="386" class="axis-label">Precipitação (mm)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fi</text>
+                  </svg>
+                </div>
+              </figure>
+
+              <figure class="chart-card chart-pane" id="chart-precip-hist" role="tabpanel" aria-labelledby="tab-chart-precip-hist" data-chart-group="precipitacoes">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 02</span>
+                    <h4>Histograma (Fi)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Histograma de precipitações">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="272" x2="706" y2="272" class="grid-line"></line>
+                    <line x1="106" y1="215" x2="706" y2="215" class="grid-line"></line>
+                    <line x1="106" y1="159" x2="706" y2="159" class="grid-line"></line>
+                    <line x1="106" y1="102" x2="706" y2="102" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="272" class="scale-label">1</text>
+                    <text x="92" y="215" class="scale-label">2</text>
+                    <text x="92" y="159" class="scale-label">3</text>
+                    <text x="92" y="102" class="scale-label">4</text>
+                    <text x="92" y="46" class="scale-label">5</text>
+                    <rect x="106" y="159" width="120" height="169" class="hist-bar"></rect>
+                    <rect x="226" y="102" width="120" height="226" class="hist-bar"></rect>
+                    <rect x="346" y="215" width="120" height="113" class="hist-bar"></rect>
+                    <rect x="466" y="46" width="120" height="282" class="hist-bar"></rect>
+                    <rect x="586" y="272" width="120" height="56" class="hist-bar"></rect>
+                    <text x="166" y="143" class="value-label">3</text>
+                    <text x="286" y="86" class="value-label">4</text>
+                    <text x="406" y="199" class="value-label">2</text>
+                    <text x="526" y="30" class="value-label">5</text>
+                    <text x="646" y="256" class="value-label">1</text>
+                    <text x="106" y="350" class="tick-label">15</text>
+                    <text x="226" y="350" class="tick-label">23</text>
+                    <text x="346" y="350" class="tick-label">31</text>
+                    <text x="466" y="350" class="tick-label">39</text>
+                    <text x="586" y="350" class="tick-label">47</text>
+                    <text x="706" y="350" class="tick-label">55</text>
+                    <text x="406" y="386" class="axis-label">Precipitação (mm)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fi</text>
+                  </svg>
+                </div>
+              </figure>
+
+              <figure class="chart-card chart-pane" id="chart-precip-line" role="tabpanel" aria-labelledby="tab-chart-precip-line" data-chart-group="precipitacoes">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 03</span>
+                    <h4>Linha acumulada (Fia)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Gráfico de linha da frequência acumulada das precipitações">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="272" x2="706" y2="272" class="grid-line"></line>
+                    <line x1="106" y1="215" x2="706" y2="215" class="grid-line"></line>
+                    <line x1="106" y1="159" x2="706" y2="159" class="grid-line"></line>
+                    <line x1="106" y1="102" x2="706" y2="102" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="272" class="scale-label">3</text>
+                    <text x="92" y="215" class="scale-label">6</text>
+                    <text x="92" y="159" class="scale-label">9</text>
+                    <text x="92" y="102" class="scale-label">12</text>
+                    <text x="92" y="46" class="scale-label">15</text>
+                    <polyline points="166,272 286,196 406,159 526,65 646,46" class="line-path"></polyline>
+                    <circle cx="166" cy="272" r="7" class="line-point"></circle>
+                    <circle cx="286" cy="196" r="7" class="line-point"></circle>
+                    <circle cx="406" cy="159" r="7" class="line-point"></circle>
+                    <circle cx="526" cy="65" r="7" class="line-point"></circle>
+                    <circle cx="646" cy="46" r="7" class="line-point"></circle>
+                    <text x="166" y="254" class="value-label">3</text>
+                    <text x="286" y="178" class="value-label">7</text>
+                    <text x="406" y="141" class="value-label">9</text>
+                    <text x="526" y="47" class="value-label">14</text>
+                    <text x="646" y="28" class="value-label">15</text>
+                    <text x="166" y="350" class="tick-label">15 |- 23</text>
+                    <text x="286" y="350" class="tick-label">23 |- 31</text>
+                    <text x="406" y="350" class="tick-label">31 |- 39</text>
+                    <text x="526" y="350" class="tick-label">39 |- 47</text>
+                    <text x="646" y="350" class="tick-label">47 |- 55</text>
+                    <text x="406" y="386" class="axis-label">Precipitação (mm)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fia</text>
+                  </svg>
+                </div>
+              </figure>
+            </div>
+          </div>
+        </article>
+
+        <article class="exercise-card panel" id="ex-2-2">
+          <div class="exercise-header">
+            <div>
+              <span class="mono-label">EXERCÍCIO 2.2</span>
+              <h3>Tempo de duração das análises granulométricas</h3>
+            </div>
+            <div class="exercise-chip">n = 28</div>
+          </div>
+
+          <div class="exercise-layout wide-layout">
+            <div class="table-shell">
+              <table class="data-table">
+                <caption>Distribuição de frequência para tempo das análises</caption>
+                <thead>
+                  <tr>
+                    <th>Classe (dias)</th>
+                    <th>Fi</th>
+                    <th>Fia</th>
+                    <th>Fr (%)</th>
+                    <th>Fra (%)</th>
+                    <th>Xi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="highlight-row">
+                    <td>4 |- 6</td>
+                    <td>20</td>
+                    <td>20</td>
+                    <td>71,4</td>
+                    <td>71,4</td>
+                    <td>5</td>
+                  </tr>
+                  <tr>
+                    <td>6 |- 8</td>
+                    <td>3</td>
+                    <td>23</td>
+                    <td>10,7</td>
+                    <td>82,1</td>
+                    <td>7</td>
+                  </tr>
+                  <tr>
+                    <td>8 |- 10</td>
+                    <td>5</td>
+                    <td>28</td>
+                    <td>17,9</td>
+                    <td>100,0</td>
+                    <td>9</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td>28</td>
+                    <td>-</td>
+                    <td>100,0</td>
+                    <td>-</td>
+                    <td>-</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div class="analysis-stack">
+              <div class="note-panel note-panel-accent">
+                <span class="mono-label">OBSERVAÇÃO</span>
+                <p>
+                  Aqui o próprio enunciado já fornece as classes e as frequências relativas
+                  percentuais. Restava completar Fia, Fra(%) e Xi.
+                </p>
+              </div>
+
+              <div class="result-panel">
+                <span class="mono-label">LEITURA RÁPIDA</span>
+                <p>A maior concentração de observações ocorre na classe <strong>4 |- 6 dias</strong>, com <strong>Fi = 20</strong>.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-stage" data-chart-group="analises">
+            <div class="chart-switcher" role="tablist" aria-label="Selecionar gráfico do exercício 2.2">
+              <button class="chart-toggle is-active" type="button" role="tab" aria-selected="true" aria-controls="chart-analises-bars" id="tab-chart-analises-bars" data-chart-group="analises" data-chart-target="chart-analises-bars">
+                <span class="chart-toggle-number">04</span> Colunas
+              </button>
+              <button class="chart-toggle" type="button" role="tab" aria-selected="false" aria-controls="chart-analises-hist" id="tab-chart-analises-hist" data-chart-group="analises" data-chart-target="chart-analises-hist">
+                <span class="chart-toggle-number">05</span> Histograma
+              </button>
+              <button class="chart-toggle" type="button" role="tab" aria-selected="false" aria-controls="chart-analises-line" id="tab-chart-analises-line" data-chart-group="analises" data-chart-target="chart-analises-line">
+                <span class="chart-toggle-number">06</span> Linha acumulada
+              </button>
+            </div>
+
+            <div class="chart-viewer">
+              <figure class="chart-card chart-pane is-active" id="chart-analises-bars" role="tabpanel" aria-labelledby="tab-chart-analises-bars" data-chart-group="analises">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 04</span>
+                    <h4>Colunas (Fi)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Gráfico de colunas do tempo das análises">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="258" x2="706" y2="258" class="grid-line"></line>
+                    <line x1="106" y1="187" x2="706" y2="187" class="grid-line"></line>
+                    <line x1="106" y1="117" x2="706" y2="117" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="258" class="scale-label">5</text>
+                    <text x="92" y="187" class="scale-label">10</text>
+                    <text x="92" y="117" class="scale-label">15</text>
+                    <text x="92" y="46" class="scale-label">20</text>
+                    <rect x="156" y="46" width="100" height="282" rx="4" class="bar"></rect>
+                    <rect x="356" y="286" width="100" height="42" rx="4" class="bar"></rect>
+                    <rect x="556" y="258" width="100" height="70" rx="4" class="bar"></rect>
+                    <text x="206" y="30" class="value-label">20</text>
+                    <text x="406" y="270" class="value-label">3</text>
+                    <text x="606" y="242" class="value-label">5</text>
+                    <text x="206" y="350" class="tick-label">4 |- 6</text>
+                    <text x="406" y="350" class="tick-label">6 |- 8</text>
+                    <text x="606" y="350" class="tick-label">8 |- 10</text>
+                    <text x="406" y="386" class="axis-label">Tempo (dias)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fi</text>
+                  </svg>
+                </div>
+              </figure>
+
+              <figure class="chart-card chart-pane" id="chart-analises-hist" role="tabpanel" aria-labelledby="tab-chart-analises-hist" data-chart-group="analises">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 05</span>
+                    <h4>Histograma (Fi)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Histograma do tempo das análises">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="258" x2="706" y2="258" class="grid-line"></line>
+                    <line x1="106" y1="187" x2="706" y2="187" class="grid-line"></line>
+                    <line x1="106" y1="117" x2="706" y2="117" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="258" class="scale-label">5</text>
+                    <text x="92" y="187" class="scale-label">10</text>
+                    <text x="92" y="117" class="scale-label">15</text>
+                    <text x="92" y="46" class="scale-label">20</text>
+                    <rect x="106" y="46" width="200" height="282" class="hist-bar"></rect>
+                    <rect x="306" y="286" width="200" height="42" class="hist-bar"></rect>
+                    <rect x="506" y="258" width="200" height="70" class="hist-bar"></rect>
+                    <text x="206" y="30" class="value-label">20</text>
+                    <text x="406" y="270" class="value-label">3</text>
+                    <text x="606" y="242" class="value-label">5</text>
+                    <text x="106" y="350" class="tick-label">4</text>
+                    <text x="306" y="350" class="tick-label">6</text>
+                    <text x="506" y="350" class="tick-label">8</text>
+                    <text x="706" y="350" class="tick-label">10</text>
+                    <text x="406" y="386" class="axis-label">Tempo (dias)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fi</text>
+                  </svg>
+                </div>
+              </figure>
+
+              <figure class="chart-card chart-pane" id="chart-analises-line" role="tabpanel" aria-labelledby="tab-chart-analises-line" data-chart-group="analises">
+                <figcaption>
+                  <div>
+                    <span class="mono-label">GRÁFICO 06</span>
+                    <h4>Linha acumulada (Fia)</h4>
+                  </div>
+                </figcaption>
+                <div class="chart-frame">
+                  <svg viewBox="0 0 760 420" class="chart" aria-label="Gráfico de linha da frequência acumulada do tempo das análises">
+                    <rect x="106" y="46" width="600" height="282" class="plot-backdrop"></rect>
+                    <line x1="106" y1="46" x2="106" y2="328" class="axis"></line>
+                    <line x1="106" y1="328" x2="706" y2="328" class="axis"></line>
+                    <line x1="106" y1="257" x2="706" y2="257" class="grid-line"></line>
+                    <line x1="106" y1="187" x2="706" y2="187" class="grid-line"></line>
+                    <line x1="106" y1="116" x2="706" y2="116" class="grid-line"></line>
+                    <line x1="106" y1="46" x2="706" y2="46" class="grid-line"></line>
+                    <text x="92" y="328" class="scale-label">0</text>
+                    <text x="92" y="257" class="scale-label">7</text>
+                    <text x="92" y="187" class="scale-label">14</text>
+                    <text x="92" y="116" class="scale-label">21</text>
+                    <text x="92" y="46" class="scale-label">28</text>
+                    <polyline points="206,127 406,96 606,46" class="line-path"></polyline>
+                    <circle cx="206" cy="127" r="7" class="line-point"></circle>
+                    <circle cx="406" cy="96" r="7" class="line-point"></circle>
+                    <circle cx="606" cy="46" r="7" class="line-point"></circle>
+                    <text x="206" y="109" class="value-label">20</text>
+                    <text x="406" y="78" class="value-label">23</text>
+                    <text x="606" y="28" class="value-label">28</text>
+                    <text x="206" y="350" class="tick-label">4 |- 6</text>
+                    <text x="406" y="350" class="tick-label">6 |- 8</text>
+                    <text x="606" y="350" class="tick-label">8 |- 10</text>
+                    <text x="406" y="386" class="axis-label">Tempo (dias)</text>
+                    <text x="34" y="187" class="axis-label axis-label-vertical">Fia</text>
+                  </svg>
+                </div>
+              </figure>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+  </div>
+  <script>
+    document.querySelectorAll(".chart-stage").forEach((stage) => {
+      const tabs = Array.from(stage.querySelectorAll(".chart-toggle"));
+      const panes = Array.from(stage.querySelectorAll(".chart-pane"));
+
+      const activate = (targetId) => {
+        tabs.forEach((tab) => {
+          const isActive = tab.dataset.chartTarget === targetId;
+          tab.classList.toggle("is-active", isActive);
+          tab.setAttribute("aria-selected", String(isActive));
+          tab.tabIndex = isActive ? 0 : -1;
+        });
+
+        panes.forEach((pane) => {
+          const isActive = pane.id === targetId;
+          pane.classList.toggle("is-active", isActive);
+          pane.setAttribute("aria-hidden", String(!isActive));
+        });
+      };
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => activate(tab.dataset.chartTarget));
+
+        tab.addEventListener("keydown", (event) => {
+          if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) {
+            return;
+          }
+
+          event.preventDefault();
+
+          let nextIndex = index;
+          if (event.key === "ArrowRight") {
+            nextIndex = (index + 1) % tabs.length;
+          } else if (event.key === "ArrowLeft") {
+            nextIndex = (index - 1 + tabs.length) % tabs.length;
+          } else if (event.key === "Home") {
+            nextIndex = 0;
+          } else if (event.key === "End") {
+            nextIndex = tabs.length - 1;
+          }
+
+          const nextTab = tabs[nextIndex];
+          nextTab.focus();
+          activate(nextTab.dataset.chartTarget);
+        });
+      });
+
+      const initialTab = stage.querySelector(".chart-toggle.is-active") || tabs[0];
+      if (initialTab) {
+        activate(initialTab.dataset.chartTarget);
+      }
+    });
+  </script>
+</body>
+</html>
