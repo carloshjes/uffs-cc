@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Exercícios - Sistemas Numéricos - Carlos Henrique</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.5;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        
+        .capa {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .capa h1 {
+            font-size: 16pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .capa h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .capa p {
+            font-size: 12pt;
+            margin: 5px 0;
+        }
+
+        .destaque-aluno {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .conteudo-questoes {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: justify;
+        }
+        
+        .questao-titulo {
+            font-weight: bold;
+            font-size: 12pt;
+            margin-top: 30px;
+        }
+        
+        .alternativas {
+            list-style-type: lower-alpha; 
+            margin-top: 10px;
+            font-weight: normal; 
+        }
+        
+        .alternativas li {
+            margin-bottom: 25px; 
+        }
+
+        .area-resposta {
+            background-color: transparent;
+            border-left: 1px solid #000000;
+            padding-left: 15px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 12pt;
+        }
+
+        pre.conta-armada {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: transparent;
+            padding: 0;
+            margin: 10px 0;
+            line-height: 1.2;
+            color: #000000;
+            border: none; 
+        }
+
+        .caixa-resultado {
+            border: 1px solid #000000;
+            padding: 4px 10px;
+            display: inline-block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 30mm 20mm 20mm 30mm; 
+            }
+            .conteudo-questoes {
+                padding: 0;
+                max-width: 100%;
+            }
+            li, .area-resposta, pre.conta-armada, .caixa-resultado {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="capa">
+        <h1>Universidade Federal da Fronteira Sul - UFFS</h1>
+        <h2>Curso de Ciência da Computação</h2>
+        
+        <br><br>
+        
+        <p>Disciplina: Organização de Computadores</p>
+        <p>Professora: Silvana Teodoro</p>
+        
+        <div class="destaque-aluno">
+            Aluno: Carlos Henrique de Jesus
+        </div>
+        
+        <br><br>
+        
+        <p>Assunto: Sistemas Numéricos</p>
+        <p>Exercícios Referentes à Aula Extra de 28/03</p>
+        <p>Data de entrega: 29/03/2026</p>
+    </header>
+
+    <main class="conteudo-questoes">
+        <ol class="questoes">
+            
+            <li class="questao-titulo">Converta os seguintes números de decimal para binário:
+                <ol class="alternativas">
+                    <li>145 
+                        <div class="area-resposta">
+                            145 &divide; 2 = 72 (resto 1)<br>
+                            72 &divide; 2 = 36 (resto 0)<br>
+                            36 &divide; 2 = 18 (resto 0)<br>
+                            18 &divide; 2 = 9 (resto 0)<br>
+                            9 &divide; 2 = 4 (resto 1)<br>
+                            4 &divide; 2 = 2 (resto 0)<br>
+                            2 &divide; 2 = 1 (resto 0)<br>
+                            1 &divide; 2 = 0 (resto 1)<br>
+                            <span class="caixa-resultado">Resultado: 10010001<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>226 
+                        <div class="area-resposta">
+                            226 &divide; 2 = 113 (resto 0)<br>
+                            113 &divide; 2 = 56 (resto 1)<br>
+                            56 &divide; 2 = 28 (resto 0)<br>
+                            28 &divide; 2 = 14 (resto 0)<br>
+                            14 &divide; 2 = 7 (resto 0)<br>
+                            7 &divide; 2 = 3 (resto 1)<br>
+                            3 &divide; 2 = 1 (resto 1)<br>
+                            1 &divide; 2 = 0 (resto 1)<br>
+                            <span class="caixa-resultado">Resultado: 11100010<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1043 
+                        <div class="area-resposta">
+                            1043 &divide; 2 = 521 (resto 1)<br>
+                            521 &divide; 2 = 260 (resto 1)<br>
+                            260 &divide; 2 = 130 (resto 0)<br>
+                            130 &divide; 2 = 65 (resto 0)<br>
+                            65 &divide; 2 = 32 (resto 1)<br>
+                            32 &divide; 2 = 16 (resto 0)<br>
+                            16 &divide; 2 = 8 (resto 0)<br>
+                            8 &divide; 2 = 4 (resto 0)<br>
+                            4 &divide; 2 = 2 (resto 0)<br>
+                            2 &divide; 2 = 1 (resto 0)<br>
+                            1 &divide; 2 = 0 (resto 1)<br>
+                            <span class="caixa-resultado">Resultado: 10000010011<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>3456 
+                        <div class="area-resposta">
+                            3456 &divide; 2 = 1728 (resto 0)<br>
+                            1728 &divide; 2 = 864 (resto 0)<br>
+                            864 &divide; 2 = 432 (resto 0)<br>
+                            432 &divide; 2 = 216 (resto 0)<br>
+                            216 &divide; 2 = 108 (resto 0)<br>
+                            108 &divide; 2 = 54 (resto 0)<br>
+                            54 &divide; 2 = 27 (resto 0)<br>
+                            27 &divide; 2 = 13 (resto 1)<br>
+                            13 &divide; 2 = 6 (resto 1)<br>
+                            6 &divide; 2 = 3 (resto 0)<br>
+                            3 &divide; 2 = 1 (resto 1)<br>
+                            1 &divide; 2 = 0 (resto 1)<br>
+                            <span class="caixa-resultado">Resultado: 110110000000<sub>2</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Converta os seguintes números de binário para decimal:
+                <ol class="alternativas">
+                    <li>100 
+                        <div class="area-resposta">
+                            1 &times; 2<sup>2</sup> + 0 &times; 2<sup>1</sup> + 0 &times; 2<sup>0</sup> = 4 + 0 + 0<br>
+                            <span class="caixa-resultado">Resultado: 4<sub>10</sub></span>
+                        </div>
+                    </li>
+                    <li>1010 
+                        <div class="area-resposta">
+                            1 &times; 2<sup>3</sup> + 0 &times; 2<sup>2</sup> + 1 &times; 2<sup>1</sup> + 0 &times; 2<sup>0</sup> = 8 + 0 + 2 + 0<br>
+                            <span class="caixa-resultado">Resultado: 10<sub>10</sub></span>
+                        </div>
+                    </li>
+                    <li>1111011 
+                        <div class="area-resposta">
+                            1 &times; 2<sup>6</sup> + 1 &times; 2<sup>5</sup> + 1 &times; 2<sup>4</sup> + 1 &times; 2<sup>3</sup> + 0 &times; 2<sup>2</sup> + 1 &times; 2<sup>1</sup> + 1 &times; 2<sup>0</sup><br>
+                            = 64 + 32 + 16 + 8 + 0 + 2 + 1<br>
+                            <span class="caixa-resultado">Resultado: 123<sub>10</sub></span>
+                        </div>
+                    </li>
+                    <li>10101111 
+                        <div class="area-resposta">
+                            1 &times; 2<sup>7</sup> + 0 &times; 2<sup>6</sup> + 1 &times; 2<sup>5</sup> + 0 &times; 2<sup>4</sup> + 1 &times; 2<sup>3</sup> + 1 &times; 2<sup>2</sup> + 1 &times; 2<sup>1</sup> + 1 &times; 2<sup>0</sup><br>
+                            = 128 + 0 + 32 + 0 + 8 + 4 + 2 + 1<br>
+                            <span class="caixa-resultado">Resultado: 175<sub>10</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Converta os seguintes números de decimal para hexadecimal:
+                <ol class="alternativas">
+                    <li>145 
+                        <div class="area-resposta">
+                            145 &divide; 16 = 9 (resto 1)<br>
+                            9 &divide; 16 = 0 (resto 9)<br>
+                            <span class="caixa-resultado">Resultado: 91<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>226 
+                        <div class="area-resposta">
+                            226 &divide; 16 = 14 (resto 2)<br>
+                            14 &divide; 16 = 0 (resto 14 &rarr; E)<br>
+                            <span class="caixa-resultado">Resultado: E2<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>1043 
+                        <div class="area-resposta">
+                            1043 &divide; 16 = 65 (resto 3)<br>
+                            65 &divide; 16 = 4 (resto 1)<br>
+                            4 &divide; 16 = 0 (resto 4)<br>
+                            <span class="caixa-resultado">Resultado: 413<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>3456 
+                        <div class="area-resposta">
+                            3456 &divide; 16 = 216 (resto 0)<br>
+                            216 &divide; 16 = 13 (resto 8)<br>
+                            13 &divide; 16 = 0 (resto 13 &rarr; D)<br>
+                            <span class="caixa-resultado">Resultado: D80<sub>16</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Converta os seguintes números de binário para hexadecimal:
+                <ol class="alternativas">
+                    <li>100 
+                        <div class="area-resposta">
+                            Agrupando (4 bits): 0100 &rarr; 4<br>
+                            <span class="caixa-resultado">Resultado: 4<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>1010 
+                        <div class="area-resposta">
+                            Agrupando (4 bits): 1010 &rarr; 10 (A)<br>
+                            <span class="caixa-resultado">Resultado: A<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>1111011 
+                        <div class="area-resposta">
+                            Agrupando: 0111 | 1011<br>
+                            0111 = 7<br>
+                            1011 = 11 &rarr; B<br>
+                            <span class="caixa-resultado">Resultado: 7B<sub>16</sub></span>
+                        </div>
+                    </li>
+                    <li>10101111 
+                        <div class="area-resposta">
+                            Agrupando: 1010 | 1111<br>
+                            1010 = 10 &rarr; A<br>
+                            1111 = 15 &rarr; F<br>
+                            <span class="caixa-resultado">Resultado: AF<sub>16</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Converta os seguintes números de hexadecimal para binário:
+                <ol class="alternativas">
+                    <li>0xFC 
+                        <div class="area-resposta">
+                            F = 15 &rarr; 1111<br>
+                            C = 12 &rarr; 1100<br>
+                            <span class="caixa-resultado">Resultado: 11111100<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>0x10 
+                        <div class="area-resposta">
+                            1 &rarr; 0001<br>
+                            0 &rarr; 0000<br>
+                            <span class="caixa-resultado">Resultado: 00010000<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>0x28 
+                        <div class="area-resposta">
+                            2 &rarr; 0010<br>
+                            8 &rarr; 1000<br>
+                            <span class="caixa-resultado">Resultado: 00101000<sub>2</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Converta os seguintes números de binário para hexadecimal:
+                <ol class="alternativas">
+                    <li>100 <div class="area-resposta">(Resoluções idênticas à questão 4)<br><span class="caixa-resultado">Resultado: 4<sub>16</sub></span></div></li>
+                    <li>1010 <div class="area-resposta"><span class="caixa-resultado">Resultado: A<sub>16</sub></span></div></li>
+                    <li>1111011 <div class="area-resposta"><span class="caixa-resultado">Resultado: 7B<sub>16</sub></span></div></li>
+                    <li>10101111 <div class="area-resposta"><span class="caixa-resultado">Resultado: AF<sub>16</sub></span></div></li>
+                </ol>
+            </li>
+
+            <li class="questao-titulo">Sem converter as bases binárias, resolva:
+                <ol class="alternativas">
+                    <li>1101 + 100 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1101
++ 0100
+------
+ 10001
+</pre>
+                            <strong>Passos:</strong><br>
+                            1ª col: 1 + 0 = 1<br>
+                            2ª col: 0 + 0 = 0<br>
+                            3ª col: 1 + 1 = 10 (Escreve 0, vai 1)<br>
+                            4ª col: 1 + 0 + (vai 1) = 10<br>
+                            <span class="caixa-resultado">Resultado: 10001<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1110 + 111 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1110
++ 0111
+------
+ 10101
+</pre>
+                            <strong>Passos:</strong><br>
+                            1ª col: 0 + 1 = 1<br>
+                            2ª col: 1 + 1 = 10 (Escreve 0, vai 1)<br>
+                            3ª col: 1 + 1 + (vai 1) = 11 (Escreve 1, vai 1)<br>
+                            4ª col: 1 + 0 + (vai 1) = 10<br>
+                            <span class="caixa-resultado">Resultado: 10101<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>10101111 + 1111011 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  10101111
++ 01111011
+----------
+ 100101010
+</pre>
+                            <strong>Passos principais:</strong><br>
+                            * Colunas com 1 + 1 = 0 (vai 1).<br>
+                            * Colunas com 1 + 1 + (vai 1) = 1 (vai 1). Isso ocorre nas colunas 2, 4 e 6 (da direita para a esquerda).<br>
+                            <span class="caixa-resultado">Resultado: 100101010<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1011011 + 1011111 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1011011
++ 1011111
+---------
+ 10111010
+</pre>
+                            <strong>Passos principais:</strong><br>
+                            1ª col: 1 + 1 = 0 (vai 1).<br>
+                            2ª col: 1 + 1 + (vai 1) = 1 (vai 1).<br>
+                            6ª col (zeros): 0 + 0 + (vai 1) = 1.<br>
+                            <span class="caixa-resultado">Resultado: 10111010<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1101 - 100 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1101
+- 0100
+------
+  1001
+</pre>
+                            <strong>Passos:</strong><br>
+                            1ª col: 1 - 0 = 1<br>
+                            2ª col: 0 - 0 = 0<br>
+                            3ª col: 1 - 1 = 0<br>
+                            4ª col: 1 - 0 = 1<br>
+                            <span class="caixa-resultado">Resultado: 1001<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1001 - 111 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1001
+- 0111
+------
+  0010
+</pre>
+                            <strong>Passos:</strong><br>
+                            1ª col: 1 - 1 = 0.<br>
+                            2ª col: 0 - 1 (Pede emprestado à 4ª coluna. A 4ª coluna vira 0, a 3ª vira 1 e a 2ª recebe o empréstimo virando 10).<br>
+                            Nova 2ª col: 10 - 1 = 1.<br>
+                            Nova 3ª col: 1 - 1 = 0.<br>
+                            <span class="caixa-resultado">Resultado: 0010<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1111011 - 101011 
+                        <div class="area-resposta">
+<pre class="conta-armada">
+  1111011
+- 0101011
+---------
+  1010000
+</pre>
+                            <strong>Passos:</strong><br>
+                            1 - 1 = 0 nas colunas 1, 2, 4 e 6.<br>
+                            0 - 0 = 0 na coluna 3.<br>
+                            1 - 0 = 1 na coluna 5.<br>
+                            O 1 da 7ª coluna apenas desce.<br>
+                            <span class="caixa-resultado">Resultado: 1010000<sub>2</sub></span>
+                        </div>
+                    </li>
+                    <li>1011011 - 101111 
+                        <div class="area-resposta">                       
+<pre class="conta-armada">
+  1011011
+- 0101111
+---------
+   101100
+</pre>
+                            <strong>Passos:</strong><br>
+                            1ª e 2ª colunas: 1 - 1 = 0.<br>
+                            3ª coluna: 0 - 1. Pede emprestado à 4ª coluna (que vira 0). A 3ª coluna vira 10. 10 - 1 = 1.<br>
+                            4ª coluna: Agora é 0. 0 - 1. Pede emprestado à 5ª coluna. A 5ª coluna vira 0, a 4ª vira 10. 10 - 1 = 1.<br>
+                            5ª coluna: Agora é 0. 0 - 0 = 0.<br>
+                            6ª coluna: 0 - 1. Pede emprestado à 7ª coluna. 10 - 1 = 1.<br>
+                            <span class="caixa-resultado">Resultado: 101100<sub>2</sub></span>
+                        </div>
+                    </li>
+                </ol>
+            </li>
+
+        </ol>
+    </main>
+
+</body>
+</html>
