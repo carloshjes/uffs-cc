@@ -21,8 +21,11 @@
 
 - [Sobre o Repositório](#-sobre-o-repositório)
 - [Estrutura](#-estrutura)
+- [Convenções](#-convenções)
 - [Progresso por Semestre](#-progresso-por-semestre)
+- [1º Semestre em Curso](#-1º-semestre-em-curso)
 - [Grade Curricular](#-grade-curricular)
+- [Mapa de Disciplinas](#-mapa-de-disciplinas)
 - [Tecnologias](#️-tecnologias)
 - [Como Executar](#️-como-executar)
 - [Contato](#-contato)
@@ -62,11 +65,33 @@ Cada pasta de disciplina contém o material específico daquela cadeira (código
 
 ---
 
+## 📐 Convenções
+
+Para manter o repositório fácil de navegar, sigo um padrão simples de nomenclatura de arquivos dentro de cada disciplina:
+
+| Tipo de arquivo | Padrão | Pasta sugerida |
+|---|---|---|
+| Avaliação somativa (prova) | `prova_N1.<ext>`, `prova_N2.<ext>` | `provas/` |
+| Trabalho avaliado | `trabalho_<tema>.<ext>` | `trabalhos/` |
+| Lista de exercícios | `lista01_<tema>.<ext>` | `exercicios/` |
+| Resumo pessoal | `resumo_<tema>.<ext>` | `resumos/` |
+| Material de referência | `ref_<topico>.<ext>` | `resumos/` ou `assets/` |
+| Código auxiliar | `<descricao>.<ext>` | `codigo/` |
+
+**Outras convenções:**
+
+- Idioma padrão: **português (pt-BR)**.
+- Nomes de pastas e arquivos em **minúsculas**, com hífen ou underscore — sem espaços ou acentos.
+- Arquivos `.gitkeep` existem apenas para preservar pastas vazias e devem ser removidos quando a pasta tiver conteúdo real.
+- Arquivos sensíveis (chaves, `.env`, dados pessoais) ficam fora do repositório — ver `.gitignore`.
+
+---
+
 ## 📊 Progresso por Semestre
 
 <div align="center">
 
-![Progresso Geral](https://img.shields.io/badge/Progresso_geral-6%25-FFA500?style=for-the-badge&logo=bookstack&logoColor=white)
+![Progresso Geral](https://img.shields.io/badge/Progresso-1º_de_8_semestres-FFA500?style=for-the-badge&logo=bookstack&logoColor=white)
 ![Concluídos](https://img.shields.io/badge/Concluídos-0%2F8-lightgrey?style=for-the-badge)
 ![Semestre atual](https://img.shields.io/badge/Atual-1º_(2026%2F1)-0066B3?style=for-the-badge)
 ![Formatura prevista](https://img.shields.io/badge/Formatura-2029%2F2-2E8B57?style=for-the-badge)
@@ -87,6 +112,20 @@ Cada pasta de disciplina contém o material específico daquela cadeira (código
 | [**8º**](./8-semestre) | `2029/2` | Estágio curricular e disciplinas finais | ⚪ Planejado |
 
 <sub>🟢 Concluído &nbsp;·&nbsp; 🔵 Em andamento &nbsp;·&nbsp; ⚪ Planejado</sub>
+
+---
+
+## 🎯 1º Semestre em Curso
+
+Acesso direto às disciplinas que estou cursando agora:
+
+| Disciplina | Código | Dia | Status | Pasta |
+|---|---|:---:|:---:|:---:|
+| Computação Básica | `GEX1058` | Seg | 🔵 Em andamento | [📁](./1-semestre/computacao-basica) |
+| Organização de Computadores | `GEX1419` | Ter | 🔵 Em andamento | [📁](./1-semestre/organizacao-de-computadores) |
+| Estatística Básica | `GEX1059` | Qua | 🔵 Em andamento | [📁](./1-semestre/estatistica-basica) |
+| Lógica e Matemática Discreta | `GEX1418` | Qui | 🔵 Em andamento | [📁](./1-semestre/logica-e-matematica-discreta) |
+| Matemática C | `GEX1062` | Sex | 🔵 Em andamento | [📁](./1-semestre/matematica-c) |
 
 ---
 
@@ -191,6 +230,42 @@ Cada pasta de disciplina contém o material específico daquela cadeira (código
 
 ---
 
+## 🗺️ Mapa de Disciplinas
+
+Visão simplificada das principais cadeias de pré-requisitos a partir do 1º semestre — ajuda a entender o porquê de cada disciplina inicial.
+
+```mermaid
+graph LR
+    CB[Computação Básica]
+    LMD[Lógica e Mat. Discreta]
+    MC[Matemática C]
+    EB[Estatística Básica]
+    OC[Organização de Computadores]
+
+    CB --> CCi[Computação Científica]
+    CB --> PI1[Projeto Integrador I]
+    CB --> ED[Estruturas de Dados]
+    LMD --> FMI[Fundamentos Matemáticos da IA]
+    LMD --> ED
+    MC --> AL[Álgebra Linear]
+    MC --> C1[Cálculo I]
+    MC --> FMI
+    EB --> PE[Probabilidade e Estatística]
+    OC --> ASCIA[Arquit. e Sistemas para IA]
+    OC --> SO[Sistemas Operacionais]
+
+    classDef sem1 fill:#0066B3,color:#fff,stroke:#003F6F,stroke-width:2px;
+    classDef sem2 fill:#FFB81C,color:#000,stroke:#B07F00,stroke-width:1px;
+    classDef sem3 fill:#E5E5E5,color:#000,stroke:#888,stroke-width:1px;
+    class CB,LMD,MC,EB,OC sem1;
+    class CCi,PI1,FMI,AL,C1,PE,ASCIA sem2;
+    class ED,SO sem3;
+```
+
+<sub>🔵 1º semestre &nbsp;·&nbsp; 🟡 2º semestre &nbsp;·&nbsp; ⚪ semestres seguintes</sub>
+
+---
+
 ## 🛠️ Tecnologias
 
 **Usadas até agora:**
@@ -233,7 +308,9 @@ python nome_do_arquivo.py
 ## 📬 Contato
 
 - **GitHub:** [@carloshjes](https://github.com/carloshjes)
-- **E-mail:** c.henriquejesus@outlook.com
+- **LinkedIn:** [Carlos Henrique](https://www.linkedin.com/in/carlos-henrique-aa53523b9/)
+- **E-mail (Gmail):** c.henriquejesus2000@gmail.com
+- **E-mail (Outlook):** c.henriquejesus@outlook.com
 
 Sugestões, correções ou dúvidas são muito bem-vindas — fique à vontade para abrir uma [issue](https://github.com/carloshjes/uffs-cc/issues) ou deixar uma ⭐ se o repositório te ajudou de alguma forma.
 
@@ -241,7 +318,9 @@ Sugestões, correções ou dúvidas são muito bem-vindas — fique à vontade p
 
 ## 📄 Licença
 
-Repositório de uso **educacional**. O conteúdo autoral pode ser livremente utilizado como referência para estudos, desde que a fonte seja citada. Materiais de aula, enunciados de exercícios e recursos de terceiros pertencem aos seus respectivos autores e à UFFS.
+Repositório de uso **educacional**, licenciado sob [Creative Commons Attribution 4.0 International (CC BY 4.0)](./LICENSE).
+
+O conteúdo autoral pode ser livremente utilizado como referência para estudos, desde que a fonte seja citada. Materiais de aula, enunciados de exercícios e recursos de terceiros pertencem aos seus respectivos autores e à UFFS.
 
 ---
 
