@@ -1,0 +1,1971 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operadores Lógicos e Tabelas Verdade</title>
+  <meta name="description" content="Versão em HTML da planilha de operadores lógicos e tabelas verdade.">
+  <style>
+    :root {
+      --bg-top: rgb(2, 7, 13);
+      --bg-mid: rgb(3, 16, 26);
+      --bg-bottom: rgb(2, 8, 16);
+      --bg-cyan-alpha: 0.16;
+      --bg-lime-alpha: 0.12;
+      --bg-cyan-x: 0px;
+      --bg-cyan-y: 0px;
+      --bg-lime-x: 0px;
+      --bg-lime-y: 0px;
+      --scanline-opacity: 0.22;
+      --bg: #03101a;
+      --bg-alt: #071827;
+      --panel: rgba(7, 24, 39, 0.86);
+      --panel-strong: rgba(5, 18, 31, 0.96);
+      --panel-soft: rgba(8, 28, 44, 0.72);
+      --text: #eaf7ff;
+      --muted: #86a9be;
+      --line: rgba(0, 246, 255, 0.2);
+      --line-strong: rgba(0, 246, 255, 0.45);
+      --cyan: #00f6ff;
+      --lime: #7dff72;
+      --amber: #ffd36e;
+      --danger: #ff6d8f;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --table-fade-offset: 52px;
+      --sidebar-width: 318px;
+      --content-width: min(100%, 1080px);
+      --sans: "Bahnschrift", "Segoe UI", "Trebuchet MS", sans-serif;
+      --mono: "Cascadia Code", "Consolas", "SFMono-Regular", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at calc(12% + var(--bg-cyan-x)) calc(9% + var(--bg-cyan-y)), rgba(0, 246, 255, var(--bg-cyan-alpha)), transparent 28%),
+        radial-gradient(circle at calc(84% - var(--bg-lime-x)) calc(12% + var(--bg-lime-y)), rgba(125, 255, 114, var(--bg-lime-alpha)), transparent 24%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 34%, var(--bg-bottom) 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+      background-size: 100% 36px, 36px 100%;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 92%);
+      opacity: 0.42;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 0%, rgba(0, 246, 255, 0.08) 50%, transparent 100%);
+      background-size: 100% 180px;
+      mix-blend-mode: screen;
+      opacity: var(--scanline-opacity);
+      animation: scanline 12s linear infinite;
+    }
+
+    .page-shell {
+      width: min(1500px, calc(100% - 40px));
+      margin: 24px auto 48px;
+      display: grid;
+      grid-template-columns: minmax(260px, var(--sidebar-width)) minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(8, 27, 42, 0.86), rgba(4, 15, 25, 0.95));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(0, 246, 255, 0.14), transparent 18%, transparent 82%, rgba(125, 255, 114, 0.08)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+    }
+
+    .brand-panel {
+      padding: 22px 22px 20px;
+    }
+
+    .brand-panel__kicker,
+    .hero__kicker,
+    .section__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .brand-panel__kicker::before,
+    .hero__kicker::before,
+    .section__eyebrow::before {
+      content: "";
+      width: 18px;
+      height: 1px;
+      background: currentColor;
+      box-shadow: 0 0 16px currentColor;
+    }
+
+    .brand-panel h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(1.9rem, 2.6vw, 2.65rem);
+      line-height: 0.96;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      max-width: none;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .stat-card {
+      padding: 12px 8px;
+      border-radius: var(--radius-sm);
+      background: rgba(5, 17, 29, 0.7);
+      border: 1px solid rgba(125, 255, 114, 0.16);
+      text-align: center;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 1.34rem;
+      font-family: var(--mono);
+      color: var(--lime);
+    }
+
+    .stat-card span {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.54rem;
+      line-height: 1.1;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      word-break: normal;
+      overflow-wrap: normal;
+    }
+
+    .nav-panel {
+      padding: 16px;
+      scroll-margin-top: 18px;
+    }
+
+    .nav-panel__title,
+    .status-panel__title {
+      margin: 0 0 14px;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .nav-link {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      padding: 12px 14px;
+      border-radius: 15px;
+      color: var(--text);
+      border: 1px solid transparent;
+      background: linear-gradient(180deg, rgba(8, 28, 44, 0.55), rgba(4, 14, 24, 0.88));
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+      overflow: hidden;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      inset: auto 14px 0 14px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 246, 255, 0.82), transparent);
+      opacity: 0;
+      transition: opacity 180ms ease;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus-visible,
+    .nav-link.is-active {
+      transform: translateX(3px);
+      border-color: var(--line-strong);
+      background: linear-gradient(180deg, rgba(0, 246, 255, 0.11), rgba(4, 20, 32, 0.94));
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.2);
+      outline: none;
+    }
+
+    .nav-link:hover::after,
+    .nav-link:focus-visible::after,
+    .nav-link.is-active::after {
+      opacity: 1;
+    }
+
+    .nav-link__index {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      color: var(--lime);
+    }
+
+    .nav-link__text {
+      font-size: 0.98rem;
+      letter-spacing: 0.02em;
+    }
+
+    .status-panel {
+      padding: 16px;
+    }
+
+    .status-panel ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .status-panel li {
+      padding: 12px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status-panel li:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .status-panel strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .content {
+      display: grid;
+      gap: 22px;
+      width: var(--content-width);
+      justify-self: stretch;
+    }
+
+    .hero {
+      padding: 28px;
+      min-height: 280px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .hero__main {
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .hero__student {
+      margin: 0;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 246, 255, 0.16);
+      font-family: var(--mono);
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .hero__student strong {
+      color: var(--cyan);
+      font-weight: 600;
+    }
+
+    .hero h2 {
+      margin: 0;
+      font-size: clamp(2.3rem, 5vw, 4.75rem);
+      line-height: 0.92;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      max-width: 10ch;
+    }
+
+    .hero__slab {
+      position: relative;
+      padding: 18px 18px 16px;
+      border-radius: 24px;
+      background:
+        linear-gradient(160deg, rgba(0, 246, 255, 0.11), transparent 36%),
+        linear-gradient(180deg, rgba(7, 28, 44, 0.8), rgba(4, 14, 24, 0.94));
+      border: 1px solid rgba(0, 246, 255, 0.18);
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      overflow: hidden;
+    }
+
+    .hero__slab::after {
+      content: "";
+      position: absolute;
+      inset: auto 18px 18px 18px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--lime), transparent);
+      box-shadow: 0 0 18px rgba(0, 246, 255, 0.35);
+    }
+
+    .hero__manifest {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero__manifest li {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .hero__manifest strong {
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .level-section {
+      position: relative;
+      padding: 24px;
+      scroll-margin-top: 94px;
+      border-radius: var(--radius-lg);
+      background:
+        linear-gradient(180deg, rgba(6, 20, 32, 0.92), rgba(3, 12, 20, 0.98)),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+    }
+
+    .level-section::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--section-accent), var(--section-accent-alt));
+      box-shadow: 0 0 22px var(--section-accent);
+    }
+
+    .level-section::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at top right, color-mix(in srgb, var(--section-accent) 16%, transparent), transparent 34%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 36%);
+      opacity: 0.28;
+      transition: opacity 220ms ease;
+    }
+
+    .level-section.is-active {
+      border-color: color-mix(in srgb, var(--section-accent) 34%, rgba(255, 255, 255, 0.06));
+      box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.42),
+        0 0 0 1px color-mix(in srgb, var(--section-accent) 10%, transparent) inset;
+    }
+
+    .level-section.is-active::after {
+      opacity: 0.56;
+    }
+
+    .section__header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    .section__header h2 {
+      margin: 10px 0 0;
+      font-size: clamp(1.75rem, 3vw, 2.55rem);
+      line-height: 0.98;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .section__subtitle,
+    .section__meta {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .section__meta {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+    }
+
+    .section__badge {
+      min-width: 106px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 70%),
+        rgba(5, 18, 30, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+    }
+
+    .section__badge span {
+      display: block;
+      font-family: var(--mono);
+      font-size: 1.9rem;
+      color: var(--section-accent);
+    }
+
+    .section__badge small {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .exercise-list {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      padding-left: 14px;
+    }
+
+    .exercise-list::before {
+      content: "";
+      position: absolute;
+      left: 58px;
+      top: 24px;
+      bottom: 24px;
+      width: 1px;
+      background:
+        linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.06) 8%, color-mix(in srgb, var(--section-accent) 40%, transparent) 35%, color-mix(in srgb, var(--section-accent-alt) 30%, transparent) 70%, transparent);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--section-accent) 18%, transparent);
+      opacity: 0.9;
+    }
+
+    .exercise {
+      position: relative;
+      display: grid;
+      grid-template-columns: 98px minmax(0, 1fr);
+      gap: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(10, 28, 42, 0.64), rgba(4, 15, 26, 0.88));
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      isolation: isolate;
+      scroll-margin-top: 120px;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 220ms ease, background 220ms ease;
+    }
+
+    .exercise::before {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    }
+
+    .exercise:hover,
+    .exercise:focus-within,
+    .exercise.is-active {
+      transform: translateY(-3px);
+      border-color: color-mix(in srgb, var(--section-accent) 32%, rgba(255, 255, 255, 0.06));
+      box-shadow:
+        0 18px 42px rgba(0, 0, 0, 0.26),
+        0 0 0 1px color-mix(in srgb, var(--section-accent) 12%, transparent) inset;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--section-accent) 10%, rgba(10, 28, 42, 0.82)), rgba(4, 15, 26, 0.94));
+    }
+
+    .exercise__index {
+      position: relative;
+      border-radius: 18px;
+      padding: 14px 10px;
+      background:
+        linear-gradient(180deg, rgba(0, 246, 255, 0.08), rgba(4, 17, 29, 0.82));
+      border: 1px solid rgba(0, 246, 255, 0.14);
+      display: grid;
+      justify-items: center;
+      align-content: center;
+      gap: 6px;
+      min-height: 100%;
+      overflow: hidden;
+      transition: transform 180ms ease, border-color 180ms ease, background 220ms ease;
+    }
+
+    .exercise:hover .exercise__index,
+    .exercise:focus-within .exercise__index,
+    .exercise.is-active .exercise__index {
+      transform: translateX(2px);
+      border-color: color-mix(in srgb, var(--section-accent) 30%, rgba(0, 246, 255, 0.14));
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--section-accent) 16%, rgba(0, 246, 255, 0.08)), rgba(4, 17, 29, 0.92));
+    }
+
+    .exercise__index-label {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .exercise__index strong {
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--lime);
+      font-family: var(--mono);
+    }
+
+    .exercise__body {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .exercise__body h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      line-height: 1.5;
+      font-weight: 650;
+      letter-spacing: 0.01em;
+      max-width: 64ch;
+    }
+
+    .exercise__content {
+      display: grid;
+      gap: 12px;
+    }
+
+    .note,
+    .answer {
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 16px;
+      line-height: 1.65;
+      background: rgba(5, 19, 31, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .note {
+      color: #cfe6f3;
+    }
+
+    .answer-chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .answer-chip__label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(125, 255, 114, 0.1);
+      color: var(--lime);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    .answer {
+      color: #f1ffdd;
+      border-color: rgba(125, 255, 114, 0.18);
+      background:
+        linear-gradient(180deg, rgba(125, 255, 114, 0.08), rgba(6, 21, 19, 0.88));
+    }
+
+    .table-shell {
+      position: relative;
+      overflow-x: auto;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 246, 255, 0.16);
+      background:
+        linear-gradient(180deg, rgba(4, 16, 26, 0.92), rgba(3, 13, 22, 0.98));
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in srgb, var(--section-accent) 64%, rgba(255, 255, 255, 0.2)) transparent;
+    }
+
+    .table-shell::before,
+    .table-shell::after {
+      content: "";
+      position: absolute;
+      top: var(--table-fade-offset);
+      bottom: 0;
+      width: 28px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 180ms ease;
+      z-index: 2;
+    }
+
+    .table-shell::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(3, 13, 22, 0.98), rgba(3, 13, 22, 0));
+    }
+
+    .table-shell::after {
+      right: 0;
+      background: linear-gradient(-90deg, rgba(3, 13, 22, 0.98), rgba(3, 13, 22, 0));
+    }
+
+    .table-shell.can-scroll-left::before,
+    .table-shell.can-scroll-right::after {
+      opacity: 1;
+    }
+
+    .table-shell::-webkit-scrollbar {
+      height: 10px;
+    }
+
+    .table-shell::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .table-shell::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      background: linear-gradient(90deg, color-mix(in srgb, var(--section-accent) 76%, transparent), color-mix(in srgb, var(--section-accent-alt) 68%, transparent));
+    }
+
+    .truth-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 420px;
+    }
+
+    .truth-table th,
+    .truth-table td {
+      padding: 12px 14px;
+      text-align: center;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .truth-table th:last-child,
+    .truth-table td:last-child {
+      border-right: 0;
+    }
+
+    .truth-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--cyan);
+      background:
+        linear-gradient(180deg, rgba(0, 246, 255, 0.12), rgba(5, 17, 28, 0.96));
+      backdrop-filter: blur(8px);
+    }
+
+    .truth-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .truth-table tbody tr:hover {
+      background: rgba(0, 246, 255, 0.06);
+    }
+
+    .logic-true {
+      color: var(--lime);
+      font-family: var(--mono);
+      text-shadow: 0 0 12px rgba(125, 255, 114, 0.22);
+    }
+
+    .logic-false {
+      color: var(--danger);
+      font-family: var(--mono);
+      text-shadow: 0 0 12px rgba(255, 109, 143, 0.18);
+    }
+
+    @keyframes scanline {
+      from { transform: translateY(-40px); }
+      to { transform: translateY(200px); }
+    }
+
+    @media (max-width: 1180px) {
+      .page-shell {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: minmax(280px, 1.05fr) minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .brand-panel,
+      .nav-panel,
+      .status-panel {
+        grid-column: 1 / -1;
+      }
+
+      .nav-panel {
+        position: sticky;
+        top: 12px;
+        z-index: 12;
+        padding: 12px 14px 10px;
+      }
+
+      .nav-panel__title {
+        margin-bottom: 10px;
+      }
+
+      .nav-list {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        grid-template-columns: none;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+      }
+
+      .nav-link {
+        flex: 0 0 auto;
+        min-width: max-content;
+        grid-template-columns: auto auto;
+        gap: 10px;
+        padding: 10px 12px;
+        scroll-snap-align: start;
+      }
+
+      .content {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .page-shell {
+        width: min(100% - 24px, 100%);
+        margin-top: 12px;
+      }
+
+      .sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .status-panel ul {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .status-panel li {
+        padding: 12px;
+        border-top: 0;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        background: rgba(6, 20, 32, 0.72);
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 22px;
+        min-height: auto;
+      }
+
+      .hero__main {
+        gap: 12px;
+      }
+
+      .hero h2 {
+        max-width: none;
+      }
+
+      .hero__manifest {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .hero__manifest li {
+        min-height: 100%;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        background: rgba(6, 20, 32, 0.72);
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .section__header,
+      .exercise {
+        grid-template-columns: 1fr;
+      }
+
+      .exercise-list {
+        padding-left: 0;
+      }
+
+      .exercise-list::before {
+        display: none;
+      }
+
+      .exercise__index {
+        justify-items: start;
+        grid-auto-flow: column;
+        justify-content: start;
+        min-height: auto;
+        gap: 10px;
+      }
+
+      .exercise__index strong {
+        font-size: 1.45rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page-shell {
+        width: min(100% - 18px, 100%);
+        margin: 10px auto 28px;
+        gap: 14px;
+      }
+
+      .brand-panel,
+      .nav-panel,
+      .status-panel,
+      .hero,
+      .level-section {
+        border-radius: 22px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .nav-panel {
+        padding-inline: 12px;
+      }
+
+      .nav-list {
+        gap: 8px;
+      }
+
+      .status-panel ul,
+      .hero__manifest {
+        grid-template-columns: 1fr;
+      }
+
+      .truth-table {
+        min-width: 360px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <aside class="sidebar">
+      <section class="panel brand-panel">
+        <span class="brand-panel__kicker">Lógica Matemática Discreta</span>
+        <h1>OPERADORES LÓGICOS</h1>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <strong>05</strong>
+            <span>níveis</span>
+          </div>
+          <div class="stat-card">
+            <strong>49</strong>
+            <span>exercícios</span>
+          </div>
+          <div class="stat-card">
+            <strong>30</strong>
+            <span>tabelas</span>
+          </div>
+        </div>
+      </section>
+
+      <nav class="panel nav-panel" aria-label="Navegação por níveis">
+        <p class="nav-panel__title">Índice de Níveis</p>
+        <div class="nav-list">
+          
+            <a class="nav-link" href="#n-vel-01">
+              <span class="nav-link__index">01</span>
+              <span class="nav-link__text">Nível 01</span>
+            </a>
+            
+            <a class="nav-link" href="#n-vel-02">
+              <span class="nav-link__index">02</span>
+              <span class="nav-link__text">Nível 02</span>
+            </a>
+            
+            <a class="nav-link" href="#n-vel-03">
+              <span class="nav-link__index">03</span>
+              <span class="nav-link__text">Nível 03</span>
+            </a>
+            
+            <a class="nav-link" href="#n-vel-04">
+              <span class="nav-link__index">04</span>
+              <span class="nav-link__text">Nível 04</span>
+            </a>
+            
+            <a class="nav-link" href="#n-vel-05">
+              <span class="nav-link__index">05</span>
+              <span class="nav-link__text">Nível 05</span>
+            </a>
+            
+        </div>
+      </nav>
+
+      <section class="panel status-panel">
+        <p class="status-panel__title">Leitura Rápida</p>
+        <ul>
+          <li>
+            <strong>Onde estou?</strong>
+            Você está em um deck único com os cinco níveis convertidos da planilha.
+          </li>
+          <li>
+            <strong>O que importa mais?</strong>
+            Enunciados aparecem primeiro, respostas e tabelas entram logo abaixo com contraste alto.
+          </li>
+          <li>
+            <strong>O que faço agora?</strong>
+            Use o índice lateral para saltar entre os níveis e role horizontalmente as tabelas em telas menores.
+          </li>
+        </ul>
+      </section>
+    </aside>
+
+    <main class="content">
+      <header class="panel hero">
+        <div class="hero__main">
+          <span class="hero__kicker">UFFS · Material em HTML</span>
+          <h2>Tabelas Verdade</h2>
+          <p class="hero__student"><strong>Aluno:</strong> Carlos Henrique de Jesus</p>
+        </div>
+        <aside class="hero__slab" aria-label="Resumo do arquivo">
+          <p class="nav-panel__title">Resumo do Arquivo</p>
+          <ul class="hero__manifest">
+            <li><span>Origem</span><strong>XLSX</strong></li>
+            <li><span>Formato final</span><strong>Arquivo HTML</strong></li>
+            <li><span>Assinatura visual</span><strong>Painel técnico</strong></li>
+            <li><span>Estrutura</span><strong>Seções por nível</strong></li>
+          </ul>
+        </aside>
+      </header>
+
+      
+    <section class="level-section" id="n-vel-01" style="--section-accent:#00f6ff;--section-accent-alt:#7dff72;">
+      <header class="section__header">
+        <div>
+          <span class="section__eyebrow">Nível 01</span>
+          <h2>NÍVEL 1</h2>
+          <p class='section__subtitle'>Operações Básicas e Tabelas-Verdade Simples</p><p class='section__meta'>UFFS — Lógica e Matemática Discreta</p>
+        </div>
+        <div class="section__badge">
+          <span>10</span>
+          <small>blocos</small>
+        </div>
+      </header>
+      <div class="exercise-list">
+        
+    <article class="exercise" data-exercise="1">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>1</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para a operação ~p.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>~p</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="2">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>2</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para p . q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p . q</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="3">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>3</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para p + q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p + q</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="4">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>4</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Determine o valor lógico de ~(p . q) quando p=V e q=F.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1, q=0 =&gt; ~(1 . 0) = ~(0) = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="5">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>5</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de p . ~q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~q</th><th scope='col'>p . ~q</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="6">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>6</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de ~p + q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~p</th><th scope='col'>~p + q</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="7">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>7</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>S = A . B + ~A. Determine S para A=0 e B=1.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>A=0, B=1 =&gt; S = (0 . 1) + ~0 = 0 + 1 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="8">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>8</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para ~(p + ~q).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~q</th><th scope='col'>p + ~q</th><th scope='col'>~(p + ~q)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="9">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>9</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Determine se p . ~p é uma contradição.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>~p</th><th scope='col'>p . ~p</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr></tbody></table></div>
+<p class='answer'>Sim, é uma contradição — resultado sempre FALSO.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="10">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>10</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Verifique se p + ~p é uma tautologia.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>~p</th><th scope='col'>p + ~p</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Sim, é uma tautologia — resultado sempre VERDADEIRO.</p>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section class="level-section" id="n-vel-02" style="--section-accent:#5df2ff;--section-accent-alt:#ffd36e;">
+      <header class="section__header">
+        <div>
+          <span class="section__eyebrow">Nível 02</span>
+          <h2>NÍVEL 2</h2>
+          <p class='section__subtitle'>Expressões Intermediárias e Três Variáveis</p><p class='section__meta'>UFFS — Lógica e Matemática Discreta</p>
+        </div>
+        <div class="section__badge">
+          <span>10</span>
+          <small>blocos</small>
+        </div>
+      </header>
+      <div class="exercise-list">
+        
+    <article class="exercise" data-exercise="1">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>1</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para p . q → p + q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p . q</th><th scope='col'>p + q</th><th scope='col'>(p . q) -&gt; (p + q)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Tautologia</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="2">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>2</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para ~p → (q → p).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~p</th><th scope='col'>q -&gt; p</th><th scope='col'>~p -&gt; (q -&gt; p)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="3">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>3</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade para (p → q) → p . q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p -&gt; q</th><th scope='col'>p . q</th><th scope='col'>(p -&gt; q) -&gt; p . q</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="4">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>4</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>S = (A.B.C) + (A.B.~C). Determine S para A=1, B=1, C=1.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>A=1, B=1, C=1 =&gt; S = (1.1.1) + (1.1.~1) = 1 + (1.1.0) = 1 + 0 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="5">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>5</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de p + (q . r).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>q . r</th><th scope='col'>p + (q . r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="6">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>6</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de ~p + (q . ~r).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>~p</th><th scope='col'>~r</th><th scope='col'>q . ~r</th><th scope='col'>~p + (q . ~r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="7">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>7</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de (p + q) . (p + r).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>p + q</th><th scope='col'>p + r</th><th scope='col'>(p+q) . (p+r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="8">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>8</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de (p + ~r) . (q + ~r).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>~r</th><th scope='col'>p + ~r</th><th scope='col'>q + ~r</th><th scope='col'>(p+~r).(q+~r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="9">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>9</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Construa a tabela-verdade de ~(p + ~q) . (~p + r).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>~p</th><th scope='col'>~q</th><th scope='col'>p+~q</th><th scope='col'>~(p+~q)</th><th scope='col'>~p+r</th><th scope='col'>~(p+~q).(~p+r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="10">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>10</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Determine o valor lógico de (p.q)+s → (p↔s) para p=V, q=F, s=F.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1, q=0, s=0 =&gt; (1.0)+0 -&gt; (1&lt;-&gt;0) = 0+0 -&gt; 0 = 0 -&gt; 0 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section class="level-section" id="n-vel-03" style="--section-accent:#15ffc3;--section-accent-alt:#8ba8ff;">
+      <header class="section__header">
+        <div>
+          <span class="section__eyebrow">Nível 03</span>
+          <h2>NÍVEL 3</h2>
+          <p class='section__subtitle'>Análise de Circuitos e Extração de Fórmulas</p><p class='section__meta'>UFFS — Lógica e Matemática Discreta</p>
+        </div>
+        <div class="section__badge">
+          <span>10</span>
+          <small>blocos</small>
+        </div>
+      </header>
+      <div class="exercise-list">
+        
+    <article class="exercise" data-exercise="1">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>1</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Circuito com 3 entradas (A,B,C) em porta AND de 3 entradas. Qual a expressão de S?</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>S = A . B . C</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="2">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>2</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Porta OR recebe (A.B.C), (~A.B.C) e (A.~B.C). Escreva a fórmula final.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>S = (A.B.C) + (~A.B.C) + (A.~B.C)</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="3">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>3</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>4 portas AND → OR final. S=1 para linhas 4, 5, 6 e 7. Qual a fórmula?</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>Linha</th><th scope='col'>A</th><th scope='col'>B</th><th scope='col'>C</th><th scope='col'>S</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td>2</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td>3</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td>4</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td>5</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td>6</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td>7</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>S = (~A.B.C) + (A.~B.~C) + (A.~B.C) + (A.B.~C) + (A.B.C)</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="4">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>4</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Extraia a fórmula: S=1 apenas quando (A=0,B=1,C=1) e (A=1,B=0,C=1).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>(0,1,1): ~A.B.C | (1,0,1): A.~B.C</p>
+<p class='note'>Fórmula final: S = (~A.B.C) + (A.~B.C)</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="5">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>5</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Com base na questão anterior, desenhe o diagrama lógico (NOT, AND e OR).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>A -&gt; NOT -&gt; AND1 (com B e C diretos) =&gt; ~A.B.C</p>
+<p class='note'>B -&gt; NOT -&gt; AND2 (com A e C diretos) =&gt; A.~B.C</p>
+<p class='note'>Saídas AND1 e AND2 -&gt; OR -&gt; Saida S</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="6">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>6</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Simplifique S=(A+C)+(A.B.C)+(A+B+A)+(C.C) para A=1, B=0, C=0.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>A=1,B=0,C=0 =&gt; (1+0) + (1.0.0) + (1+0+1) + (0.0) = 1 + 0 + 1 + 0 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="7">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>7</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>NOT(A) → AND(B) → OR(C). Desenhe, escreva a expressão e construa a tabela.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>A</th><th scope='col'>B</th><th scope='col'>C</th><th scope='col'>~A</th><th scope='col'>(~A . B)</th><th scope='col'>S = (~A.B)+C</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>Expressão: S = (~A . B) + C</p>
+<p class='note'>Circuíto: A -&gt; NOT -&gt; AND (com B) -&gt; OR (com C) -&gt; Saida S</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="8">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>8</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Tabela-verdade para S = A.C + A.B + ~C.B.A. Desenhe o circuito.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>A</th><th scope='col'>B</th><th scope='col'>C</th><th scope='col'>~C</th><th scope='col'>A.C</th><th scope='col'>A.B</th><th scope='col'>~C.B.A</th><th scope='col'>S</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>Circuíto: AND1(A,C) | AND2(A,B) | NOT(C)-&gt;AND3(B,A) | OR(AND1,AND2,AND3) -&gt; S</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="9">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>9</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>A partir da tabela anterior, identifique as combinações em que S é zero.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>S=0 em: (0,0,0) | (0,0,1) | (0,1,0) | (0,1,1) | (1,0,0)</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="10">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>10</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Crie um circuito para a expressão S = B + ~A.B.C + ~A + C.B.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>NOT(A) -&gt; ~A (usado em AND1 e direto na OR final)</p>
+<p class='note'>AND1(~A, B, C) -&gt; OR final | AND2(C, B) -&gt; OR final</p>
+<p class='note'>OR( B, AND1, ~A, AND2 ) -&gt; Saida S</p>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section class="level-section" id="n-vel-04" style="--section-accent:#75ffb8;--section-accent-alt:#ff8c42;">
+      <header class="section__header">
+        <div>
+          <span class="section__eyebrow">Nível 04</span>
+          <h2>NÍVEL 4</h2>
+          <p class='section__subtitle'>Lógica Proposicional Avançada e Classificação</p><p class='section__meta'>UFFS — Lógica e Matemática Discreta</p>
+        </div>
+        <div class="section__badge">
+          <span>10</span>
+          <small>blocos</small>
+        </div>
+      </header>
+      <div class="exercise-list">
+        
+    <article class="exercise" data-exercise="1">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>1</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Classifique ~p + q → (p → q). [Tautologia / Contradição/ Contingência?]</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~p</th><th scope='col'>~p+q</th><th scope='col'>p-&gt;q</th><th scope='col'>~p+q -&gt; (p-&gt;q)</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Tautologia</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="2">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>2</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Determine se p → (q → (q → p)) é uma tautologia.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>q-&gt;p</th><th scope='col'>q-&gt;(q-&gt;p)</th><th scope='col'>p-&gt;(q-&gt;(q-&gt;p))</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Tautologia</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="3">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>3</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Classifique ((p → q) ↔ q) → p.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p-&gt;q</th><th scope='col'>(p-&gt;q)&lt;-&gt;q</th><th scope='col'>((p-&gt;q)&lt;-&gt;q)-&gt;p</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Contingência</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="4">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>4</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Classifique p + ~q → (p → ~q).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~q</th><th scope='col'>p+~q</th><th scope='col'>p-&gt;~q</th><th scope='col'>p+~q -&gt; (p-&gt;~q)</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+<p class='answer'>Contingência</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="5">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>5</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Classifique ~p + ~q → (p → q).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>~p</th><th scope='col'>~q</th><th scope='col'>~p+~q</th><th scope='col'>p-&gt;q</th><th scope='col'>~p+~q -&gt; (p-&gt;q)</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Contingência</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="6">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>6</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Determine se p.q → (p ↔ q+r) é uma tautologia.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>p.q</th><th scope='col'>q+r</th><th scope='col'>p&lt;-&gt;q+r</th><th scope='col'>p.q -&gt; (p&lt;-&gt;q+r)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Tautologia</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="7">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>7</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, q=F, r=F. Determine o valor de (p ↔ p→q) + (p→r).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,q=0,r=0 =&gt; (1&lt;-&gt;(1-&gt;0)) + (1-&gt;0) = (1&lt;-&gt;0) + 0 = 0 + 0 = 0</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="8">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>8</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, q=F, r=F. Resolva: (p → ~q) ↔ ((p + r) . q).</h3>
+        <div class="exercise__content">
+          <p class='note'>p=1,q=0,r=0 =&gt; (1-&gt;~0) &lt;-&gt; ((1+0).0) = (1-&gt;1) &lt;-&gt; (1.0) = 1 &lt;-&gt; 0 = 0</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="9">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>9</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, q=F, r=F. Resolva: (p.q → r) → (p → (q → r)).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,q=0,r=0 =&gt; ((1.0)-&gt;0) -&gt; (1-&gt;(0-&gt;0)) = (0-&gt;0) -&gt; (1-&gt;1) = 1 -&gt; 1 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="10">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>10</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Suprima o maior número de parênteses: ((q↔(r+q))↔(p.(~(~q)))).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>Forma simplificada: q &lt;-&gt; r+q &lt;-&gt; p . ~~q</p>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    <section class="level-section" id="n-vel-05" style="--section-accent:#00e6ff;--section-accent-alt:#f7ff65;">
+      <header class="section__header">
+        <div>
+          <span class="section__eyebrow">Nível 05</span>
+          <h2>NÍVEL 5</h2>
+          <p class='section__subtitle'>Demonstrações e Equivalências</p><p class='section__meta'>UFFS — Lógica e Matemática Discreta</p>
+        </div>
+        <div class="section__badge">
+          <span>09</span>
+          <small>blocos</small>
+        </div>
+      </header>
+      <div class="exercise-list">
+        
+    <article class="exercise" data-exercise="1">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>1</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Demonstre por tabela-verdade: p ↔ p.q ⟺ p → q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p.q</th><th scope='col'>p-&gt;q</th><th scope='col'>p&lt;-&gt;(p.q)</th><th scope='col'>p&lt;-&gt;(p.q) &lt;-&gt; (p-&gt;q)</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Equivalência confirmada — tautologia.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="2">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>2</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Demonstre por tabela-verdade: q ↔ p+q ⟺ p → q.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p+q</th><th scope='col'>p-&gt;q</th><th scope='col'>q&lt;-&gt;(p+q)</th><th scope='col'>q&lt;-&gt;(p+q) &lt;-&gt; (p-&gt;q)</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Equivalência confirmada — tautologia.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="3">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>3</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Demonstre: (p→q).(p→r) ⟺ p → q.r.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>q.r</th><th scope='col'>p-&gt;q</th><th scope='col'>p-&gt;r</th><th scope='col'>(p-&gt;q).(p-&gt;r)</th><th scope='col'>p-&gt;q.r</th><th scope='col'>(...)&lt;-&gt;(...)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Equivalência confirmada — tautologia.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="4">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>4</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Demonstre: (p→q)+(p→r) ⟺ p → q+r.</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>r</th><th scope='col'>q+r</th><th scope='col'>p-&gt;q</th><th scope='col'>p-&gt;r</th><th scope='col'>(p-&gt;q)+(p-&gt;r)</th><th scope='col'>p-&gt;q+r</th><th scope='col'>(...)&lt;-&gt;(...)</th></tr></thead><tbody><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr></tbody></table></div>
+<p class='answer'>Equivalência confirmada — tautologia.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="5">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>5</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>Demonstre que o OU exclusivo pode ser escrito como (p+q).~(p.q).</h3>
+        <div class="exercise__content">
+          <div class='table-shell'><table class='truth-table'><thead><tr><th scope='col'>p</th><th scope='col'>q</th><th scope='col'>p+q</th><th scope='col'>p.q</th><th scope='col'>~(p.q)</th><th scope='col'>(p+q).~(p.q)</th><th scope='col'>p XOR q</th></tr></thead><tbody><tr><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr><tr><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td></tr><tr><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-true'>1</td><td class='logic-false'>0</td><td class='logic-false'>0</td><td class='logic-false'>0</td></tr></tbody></table></div>
+<p class='answer'>(p+q).~(p.q) é equivalente ao XOR — demonstrado.</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="6">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>6</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, r=V, q=F, s=F. Determine: p.q ↔ r.~s.</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,r=1,q=0,s=0 =&gt; (1.0) &lt;-&gt; (1.~0) = 0 &lt;-&gt; (1.1) = 0 &lt;-&gt; 1 = 0</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="7">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>7</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, r=V, q=F, s=F. Determine: (p↔q) → (s↔r).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,r=1,q=0,s=0 =&gt; (1&lt;-&gt;0) -&gt; (0&lt;-&gt;1) = 0 -&gt; 0 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="8">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>8</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, r=V, q=F, s=F. Resolva: (~p→q) → (s→r).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,r=1,q=0,s=0 =&gt; (~1-&gt;0) -&gt; (0-&gt;1) = (0-&gt;0) -&gt; 1 = 1 -&gt; 1 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+
+    <article class="exercise" data-exercise="9">
+      <div class="exercise__index">
+        <span class="exercise__index-label">Ex</span>
+        <strong>9</strong>
+      </div>
+      <div class="exercise__body">
+        <h3>p=V, r=V, q=F, s=F. Resolva: (q.r).s → (p↔s).</h3>
+        <div class="exercise__content">
+          <div class='answer-chip'><span class='answer-chip__label'>Resposta</span></div>
+<p class='note'>p=1,r=1,q=0,s=0 =&gt; (0.1).0 -&gt; (1&lt;-&gt;0) = 0.0 -&gt; 0 = 0 -&gt; 0 = 1</p>
+        </div>
+      </div>
+    </article>
+    
+      </div>
+    </section>
+    
+    </main>
+  </div>
+
+  <script type="application/json" id="manifest">
+    {&quot;levels&quot;: 5, &quot;exercises&quot;: 49, &quot;tables&quot;: 30}
+  </script>
+  <script>
+    const links = [...document.querySelectorAll(".nav-link")];
+    const sections = [...document.querySelectorAll(".level-section")];
+    const exercises = [...document.querySelectorAll(".exercise")];
+    const tableShells = [...document.querySelectorAll(".table-shell")];
+    const byId = new Map(links.map((link) => [link.getAttribute("href").slice(1), link]));
+    const root = document.documentElement;
+    const rootStyle = root.style;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const setActiveLink = (id) => {
+      links.forEach((node) => node.classList.toggle("is-active", node.getAttribute("href") === `#${id}`));
+    };
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const mix = (start, end, amount) => Math.round(start + (end - start) * amount);
+    const mixColor = (from, to, amount) => `rgb(${from.map((value, index) => mix(value, to[index], amount)).join(", ")})`;
+
+    let backgroundDepth = 0;
+    let backgroundTarget = 0;
+    let backgroundFrame = 0;
+
+    const applyBackgroundCalibration = (progress) => {
+      const eased = progress * progress * (3 - 2 * progress);
+      rootStyle.setProperty("--bg-top", mixColor([2, 7, 13], [2, 11, 18], eased * 0.72));
+      rootStyle.setProperty("--bg-mid", mixColor([3, 16, 26], [4, 20, 30], eased * 0.74));
+      rootStyle.setProperty("--bg-bottom", mixColor([2, 8, 16], [2, 12, 20], eased * 0.84));
+      rootStyle.setProperty("--bg-cyan-alpha", (0.16 - eased * 0.055).toFixed(3));
+      rootStyle.setProperty("--bg-lime-alpha", (0.12 - eased * 0.045).toFixed(3));
+      rootStyle.setProperty("--bg-cyan-x", `${Math.round(eased * 10)}px`);
+      rootStyle.setProperty("--bg-cyan-y", `${Math.round(eased * 46)}px`);
+      rootStyle.setProperty("--bg-lime-x", `${Math.round(eased * 18)}px`);
+      rootStyle.setProperty("--bg-lime-y", `${Math.round(eased * 34)}px`);
+      rootStyle.setProperty("--scanline-opacity", (0.22 - eased * 0.04).toFixed(3));
+    };
+
+    const syncBackgroundCalibration = () => {
+      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      backgroundTarget = clamp(window.scrollY / maxScroll, 0, 1);
+
+      if (prefersReducedMotion.matches) {
+        backgroundDepth = backgroundTarget;
+        applyBackgroundCalibration(backgroundDepth);
+        return;
+      }
+
+      if (backgroundFrame) {
+        return;
+      }
+
+      const step = () => {
+        backgroundDepth += (backgroundTarget - backgroundDepth) * 0.08;
+        applyBackgroundCalibration(backgroundDepth);
+
+        if (Math.abs(backgroundTarget - backgroundDepth) < 0.0015) {
+          backgroundDepth = backgroundTarget;
+          applyBackgroundCalibration(backgroundDepth);
+          backgroundFrame = 0;
+          return;
+        }
+
+        backgroundFrame = requestAnimationFrame(step);
+      };
+
+      backgroundFrame = requestAnimationFrame(step);
+    };
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const link = byId.get(entry.target.id);
+        entry.target.classList.toggle("is-active", entry.isIntersecting);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          setActiveLink(entry.target.id);
+        }
+      });
+    }, { rootMargin: "-25% 0px -55% 0px", threshold: 0.08 });
+
+    const exerciseObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle("is-active", entry.isIntersecting);
+      });
+    }, { rootMargin: "-18% 0px -58% 0px", threshold: 0.06 });
+
+    const syncTableShell = (shell) => {
+      const maxOffset = shell.scrollWidth - shell.clientWidth;
+      shell.classList.toggle("can-scroll-left", shell.scrollLeft > 6);
+      shell.classList.toggle("can-scroll-right", maxOffset - shell.scrollLeft > 6);
+    };
+
+    const syncAllTableShells = () => {
+      tableShells.forEach(syncTableShell);
+    };
+
+    sections.forEach((section) => sectionObserver.observe(section));
+    exercises.forEach((exercise) => exerciseObserver.observe(exercise));
+    tableShells.forEach((shell) => {
+      syncTableShell(shell);
+      shell.addEventListener("scroll", () => syncTableShell(shell), { passive: true });
+    });
+
+    const handleViewportChange = () => {
+      syncAllTableShells();
+      syncBackgroundCalibration();
+    };
+
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", syncBackgroundCalibration, { passive: true });
+
+    if (prefersReducedMotion.addEventListener) {
+      prefersReducedMotion.addEventListener("change", syncBackgroundCalibration);
+    }
+
+    syncBackgroundCalibration();
+  </script>
+</body>
+</html>
