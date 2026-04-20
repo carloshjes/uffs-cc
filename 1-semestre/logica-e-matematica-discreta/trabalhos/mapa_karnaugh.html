@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Termal — Mapa de Karnaugh</title>
+<meta name="description" content="Simulador interativo de circuito digital para sistema termal de mineração Monero, com Mapa de Karnaugh dinâmico e expressão booleana configurável.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Base substrate */
+  --bg:#04070e;--sf:rgba(10,14,22,.78);--s2:rgba(16,22,34,.88);--s3:#0f1727;
+  --gl:rgba(255,255,255,.025);--gb:rgba(255,255,255,.06);
+  --tx:#eaf0fa;--td:#8094b4;--tm:#4a5e7a;
+
+  /* Cyber accent — cyan (primary/brand) */
+  --cy:#22d3ee;--cyg:rgba(34,211,238,.1);--cygl:rgba(34,211,238,.38);--cyd:rgba(34,211,238,.55);
+
+  /* Semantic — alert (danger/active output) */
+  --rd:#fb5c5c;--rdg:rgba(251,92,92,.08);--rdgl:rgba(251,92,92,.42);--rdd:rgba(251,92,92,.6);
+
+  /* Semantic — safe (green) */
+  --gn:#2dd4a8;--gng:rgba(45,212,168,.08);--gngl:rgba(45,212,168,.38);
+
+  /* Cyber neighbour — violet (secondary cold accent) */
+  --vio:#a78bfa;--viog:rgba(167,139,250,.1);--viogl:rgba(167,139,250,.38);
+
+  /* Cyber neighbour — sky (tertiary cold accent) */
+  --sk:#38bdf8;--skg:rgba(56,189,248,.1);--skgl:rgba(56,189,248,.38);
+
+  /* Glassmorphic surface tokens */
+  --glass:rgba(14,20,32,.55);--glass-b:rgba(255,255,255,.08);--glass-hl:rgba(255,255,255,.04);
+
+  /* Bracket + angular */
+  --bk:rgba(34,211,238,.5);
+
+  --r:14px;--r-sm:8px;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'IBM Plex Mono',monospace;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+#bgc{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.15}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 30% 20%,rgba(34,211,238,.02),transparent)}
+.page{position:relative;z-index:1;max-width:1480px;margin:0 auto;padding:18px 20px}
+
+/* ═══ SR-ONLY ═══ */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;white-space:nowrap}
+
+/* ═══ HERO — COMPACT INSTRUMENT BAR ═══ */
+.hero{display:flex;align-items:center;gap:18px;padding:12px 18px 12px 22px;background:linear-gradient(90deg,rgba(34,211,238,.05),rgba(10,14,22,.7) 8%,rgba(10,14,22,.78));border:1px solid var(--gb);border-radius:12px;backdrop-filter:blur(16px);flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.hero::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:linear-gradient(180deg,var(--cy),var(--vio));box-shadow:0 0 12px var(--cygl);border-radius:2px}
+.hero::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyd),transparent);opacity:.5}
+.hero-left{display:flex;align-items:center;gap:14px;flex:1;min-width:260px}
+.hbadge{display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cy);background:var(--cyg);border:1px solid rgba(34,211,238,.13);padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.hbadge .dot{width:6px;height:6px;border-radius:50%;background:var(--cy);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 var(--cygl)}50%{opacity:.5;box-shadow:0 0 0 8px transparent}}
+.hero h1{font-family:'IBM Plex Mono',monospace;font-size:clamp(.9rem,1.2vw+0.4rem,1.1rem);font-weight:500;letter-spacing:-.01em;line-height:1.25;color:rgba(234,240,250,.92);margin:0}
+.hero h1 .accent{color:var(--cy)}
+.hero-expr{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--cy);background:var(--cyg);padding:4px 10px;border-radius:6px;border:1px solid rgba(34,211,238,.13);font-weight:600;white-space:nowrap;flex-shrink:0}
+
+/* Binary display — compact inline */
+.bin-display{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.bin-bit{font-family:'IBM Plex Mono',monospace;font-size:.95rem;font-weight:600;width:28px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--gl);border:1px solid var(--gb);border-radius:6px;transition:all .4s cubic-bezier(.16,1,.3,1);position:relative}
+.bin-bit.on{color:var(--cy);border-color:rgba(34,211,238,.3);background:var(--cyg);box-shadow:0 0 10px rgba(34,211,238,.08)}
+.bin-bit.off{color:var(--tm)}
+.bin-bit .lbl{position:absolute;top:-12px;font-size:.54rem;color:var(--tm);font-weight:500}
+.bin-sep{font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:var(--tm);display:flex;align-items:center;padding:0 4px}
+.bin-out{font-family:'IBM Plex Mono',monospace;font-size:1rem;font-weight:700;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:2px solid;transition:all .4s cubic-bezier(.16,1,.3,1)}
+.bin-out.on{color:var(--rd);border-color:var(--rd);background:var(--rdg);box-shadow:0 0 14px rgba(251,92,92,.12)}
+.bin-out.off{color:var(--gn);border-color:var(--gn);background:var(--gng)}
+@media(max-width:720px){.hero{padding:10px 14px;gap:12px}.hero-left{min-width:100%}.bin-display{width:100%;justify-content:center;margin-top:4px}}
+
+/* ═══ GRID — K-map dominante ═══ */
+.grid{display:grid;grid-template-columns:280px minmax(0,1.6fr) minmax(0,1fr);gap:16px;margin-top:14px}
+/* Tablet: K-map ganha faixa superior full-width, sensores e tabela dividem abaixo */
+@media(max-width:1100px){
+  .grid{grid-template-columns:1fr 1fr}
+  .col-k{grid-column:1/-1;order:1}
+  .col-s{order:2}
+  .col-t{order:3}
+}
+/* Mobile: sensores primeiro (acesso rápido), K-map sticky, tabela abaixo */
+@media(max-width:720px){
+  .grid{grid-template-columns:1fr;gap:12px}
+  .col-s{order:1}
+  .col-k{order:2}
+  .col-t{order:3}
+}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--sf);border:1px solid var(--gb);border-radius:var(--r);padding:18px;backdrop-filter:blur(16px);position:relative;overflow:hidden;animation:cIn .7s cubic-bezier(.16,1,.3,1) both}
+@keyframes cIn{from{opacity:0;transform:translateY(20px)}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+/* K-map card — dominant HUD treatment with corner brackets */
+.col-k .card{padding:20px 22px;border-color:rgba(34,211,238,.22);background:linear-gradient(180deg,rgba(12,18,30,.88),rgba(10,14,22,.9));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 0 28px rgba(34,211,238,.04)}
+.col-k .card::before{background:linear-gradient(90deg,transparent,var(--cyd),transparent)}
+.col-k .card::after{content:'';position:absolute;top:6px;right:6px;width:14px;height:14px;border-top:1px solid var(--cyd);border-right:1px solid var(--cyd);box-shadow:1px -1px 6px var(--cygl);pointer-events:none}
+.col-k .card .kmap-bracket-bl{position:absolute;bottom:6px;left:6px;width:14px;height:14px;border-bottom:1px solid var(--cyd);border-left:1px solid var(--cyd);box-shadow:-1px 1px 6px var(--cygl);pointer-events:none}
+.ch{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.cn{font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:600;color:var(--cy);background:var(--cyg);width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;border:1px solid rgba(34,211,238,.13)}
+.ct{font-weight:700;font-size:1rem}.cdesc{font-family:'IBM Plex Mono',monospace;font-size:.78rem;color:var(--tm);margin-bottom:14px;line-height:1.5}
+.col-k .ct{font-size:1.08rem}
+
+/* ═══ BUTTON SYSTEM — unified cyber family ═══ */
+/* Chamfered angular corners via clip-path. Scanline sweep on hover. Indicator dot optional. */
+.btn{
+  --btn-acc:var(--cy); --btn-acc-g:var(--cyg); --btn-acc-gl:var(--cygl); --btn-acc-d:var(--cyd);
+  position:relative; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:.04em;
+  color:var(--btn-acc); background:var(--btn-acc-g);
+  border:1px solid var(--btn-acc-d); outline:none; cursor:pointer; user-select:none;
+  padding:0 14px; height:32px; font-size:.72rem;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);
+  transition:color .22s ease, background .22s ease, box-shadow .3s ease, transform .18s cubic-bezier(.34,1.3,.64,1);
+  overflow:hidden; white-space:nowrap;
+}
+.btn::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(110deg, transparent 30%, var(--btn-acc-gl) 50%, transparent 70%);
+  transform:translateX(-120%); transition:transform .55s cubic-bezier(.22,1,.36,1); pointer-events:none;
+}
+.btn:hover{ background:color-mix(in srgb, var(--btn-acc) 14%, transparent); color:#fff; box-shadow:0 0 0 1px var(--btn-acc-d), 0 0 18px var(--btn-acc-gl), inset 0 0 18px color-mix(in srgb, var(--btn-acc) 8%, transparent); transform:translateY(-1px) }
+.btn:hover::before{ transform:translateX(120%) }
+.btn:active{ transform:translateY(0) scale(.97) }
+.btn:focus-visible{ box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--btn-acc), 0 0 18px var(--btn-acc-gl) }
+.btn[aria-pressed="true"], .btn.picked{
+  background:color-mix(in srgb, var(--btn-acc) 18%, transparent);
+  color:#fff;
+  box-shadow:0 0 0 1px var(--btn-acc), 0 0 16px var(--btn-acc-gl), inset 0 0 14px color-mix(in srgb, var(--btn-acc) 10%, transparent);
+}
+/* Indicator dot (add .btn-dot class, renders leading pulse) */
+.btn-dot::after{ content:''; width:6px; height:6px; border-radius:50%; background:var(--btn-acc); box-shadow:0 0 8px var(--btn-acc-gl); order:-1; flex-shrink:0 }
+
+/* Sizes */
+.btn-sm{ height:28px; padding:0 10px; font-size:.68rem; clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px) }
+.btn-md{ height:34px; padding:0 14px; font-size:.74rem }
+.btn-lg{ height:40px; padding:0 18px; font-size:.82rem; clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px) }
+
+/* Variants — semantic */
+.btn-danger{ --btn-acc:var(--rd); --btn-acc-g:var(--rdg); --btn-acc-gl:var(--rdgl); --btn-acc-d:var(--rdd) }
+.btn-safe{   --btn-acc:var(--gn); --btn-acc-g:var(--gng); --btn-acc-gl:var(--gngl); --btn-acc-d:rgba(45,212,168,.55) }
+.btn-violet{ --btn-acc:var(--vio);--btn-acc-g:var(--viog);--btn-acc-gl:var(--viogl);--btn-acc-d:rgba(167,139,250,.55) }
+.btn-ghost{ background:transparent; border-color:var(--gb); color:var(--td); --btn-acc-gl:rgba(255,255,255,.06) }
+.btn-ghost:hover{ color:var(--cy); border-color:var(--cyd); background:var(--cyg) }
+
+/* ═══ EXPRESSION INPUT ═══ */
+.expr-wrap{margin-bottom:14px}
+.expr-row{display:flex;gap:8px;align-items:center}
+.expr-input{
+  flex:1;font-family:'IBM Plex Mono',monospace;font-size:.85rem;padding:10px 14px;
+  background:rgba(8,12,20,.7);border:1px solid var(--gb);color:var(--tx);outline:none;
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+  transition:border-color .3s ease, box-shadow .3s ease, background .3s ease;
+}
+.expr-input:focus{border-color:var(--cyd);background:rgba(10,16,28,.85);box-shadow:inset 0 0 0 1px var(--cyd),0 0 22px rgba(34,211,238,.1)}
+.expr-input.error{border-color:var(--rdd);box-shadow:inset 0 0 0 1px var(--rdd),0 0 18px rgba(251,92,92,.12)}
+.expr-input::placeholder{color:var(--tm);opacity:.6}
+.expr-error-msg{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--rd);margin-top:6px;min-height:16px;transition:opacity .3s;letter-spacing:.02em}
+
+/* ═══ SENSORS ═══ */
+.sensor{display:flex;align-items:center;justify-content:space-between;padding:11px 14px 11px 16px;background:rgba(255,255,255,.015);border:1px solid var(--gb);border-radius:10px;margin-bottom:6px;transition:background .3s, border-color .3s, box-shadow .3s;position:relative;overflow:hidden}
+.sensor::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tm);border-radius:0 3px 3px 0;transition:background .3s, box-shadow .3s}
+.sensor.active{background:linear-gradient(90deg,var(--cyg),rgba(34,211,238,.02));border-color:var(--cyd);box-shadow:inset 0 0 14px rgba(34,211,238,.06)}
+.sensor.active::after{background:var(--cy);box-shadow:0 0 14px var(--cygl)}
+.sensor .rip{position:absolute;border-radius:50%;background:rgba(34,211,238,.15);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.si{display:flex;flex-direction:column;gap:1px}.sn{font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:6px}
+.sd{width:6px;height:6px;border-radius:50%;background:var(--tm);transition:all .4s}
+.sensor.active .sd{background:var(--cy);box-shadow:0 0 8px var(--cygl);animation:pulse 2s ease infinite}
+.ss{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--td);line-height:1.4}
+.tgl{position:relative;width:44px;height:23px;flex-shrink:0}.tgl input{opacity:0;width:0;height:0;position:absolute}
+.tgl .tk{position:absolute;inset:0;background:var(--s3);border:1px solid rgba(255,255,255,.07);border-radius:12px;cursor:pointer;transition:all .35s}
+.tgl .tk::after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;background:var(--tm);border-radius:50%;transition:all .35s cubic-bezier(.16,1,.3,1)}
+.tgl input:checked+.tk{background:var(--cy);border-color:var(--cy);box-shadow:0 0 12px var(--cygl)}
+.tgl input:checked+.tk::after{transform:translateX(21px);background:#fff}
+
+/* ═══ SCENARIO CHIPS — consume .btn system ═══ */
+.scenarios{margin-top:12px}
+.scenarios-label{font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--tm);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.scenarios-label::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--cy);box-shadow:0 0 6px var(--cygl)}
+.scenario-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+.scenario-grid .sbtn{width:100%;padding:0 6px}
+@media(max-width:420px){.scenario-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sbtn .sbtn-name{display:inline}
+.sbtn .sbtn-vars{display:none}
+
+/* ═══ FAN — FIXED LAYOUT ═══ */
+.fan-box{margin-top:10px;padding:18px 14px 30px;border-radius:12px;text-align:center;border:1.5px solid var(--gb);transition:all .5s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(12,16,28,.95),rgba(8,11,20,.98));box-shadow:inset 0 2px 8px rgba(0,0,0,.6),inset 0 -1px 4px rgba(255,255,255,.02),0 1px 3px rgba(0,0,0,.4)}
+.fan-box::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .5s;background:radial-gradient(circle at 50% 40%,rgba(251,92,92,.12),transparent 65%)}
+.fan-box.on{border-color:rgba(251,92,92,.45);background:linear-gradient(180deg,rgba(20,12,14,.96),rgba(12,8,10,.98));box-shadow:inset 0 2px 10px rgba(0,0,0,.7),inset 0 -1px 4px rgba(251,92,92,.04),0 0 30px rgba(251,92,92,.1),0 0 60px rgba(251,92,92,.04)}.fan-box.on::before{opacity:1}
+.fan-box.off{border-color:rgba(45,212,168,.2);background:linear-gradient(180deg,rgba(10,16,20,.96),rgba(8,12,16,.98));box-shadow:inset 0 2px 8px rgba(0,0,0,.6),inset 0 -1px 4px rgba(45,212,168,.02),0 1px 3px rgba(0,0,0,.4)}
+.pts{position:absolute;inset:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .5s}.fan-box.on .pts{opacity:1}
+.pt{position:absolute;bottom:0;width:2px;height:2px;border-radius:50%;background:var(--rd);opacity:0}
+.pt.active{animation:rise 1.6s ease-out infinite}
+@keyframes rise{0%{opacity:0;transform:translateY(0) scale(1)}15%{opacity:.8}100%{opacity:0;transform:translateY(-150px) scale(0)}}
+/* Wind streaks */
+.wind-streak{position:absolute;pointer-events:none;width:24px;height:1.5px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(251,92,92,.35),transparent);opacity:0}
+.fan-box.on .wind-streak{animation:windMove 1.2s ease-in-out infinite}
+@keyframes windMove{0%{opacity:0;transform:translateX(-10px) scaleX(.5)}30%{opacity:.7}100%{opacity:0;transform:translateX(50px) scaleX(1.5)}}
+.fan-wrap{position:relative;width:120px;height:120px;margin:0 auto 18px}
+.fan-glow{position:absolute;inset:-12px;border-radius:50%;opacity:0;transition:opacity .5s;background:radial-gradient(circle,rgba(251,92,92,.18),transparent 65%)}
+.fan-box.on .fan-glow{opacity:1;animation:glowPulse 2s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+.gauge-ring{position:absolute;inset:-3px;border-radius:50%;pointer-events:none}
+.gauge-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge-track{fill:none;stroke:rgba(255,255,255,.04);stroke-width:3}
+.gauge-fill{fill:none;stroke:var(--gn);stroke-width:3.5;stroke-linecap:round;transition:all .8s cubic-bezier(.16,1,.3,1)}
+.fan-box.on .gauge-fill{stroke:var(--rd);filter:drop-shadow(0 0 6px var(--rdgl))}
+/* Alert ring animation — perfect 360° continuous circle */
+@keyframes alertRingPulse{
+  0%{stroke-opacity:1;filter:drop-shadow(0 0 6px var(--rdgl))}
+  50%{stroke-opacity:.5;filter:drop-shadow(0 0 14px var(--rdgl)) drop-shadow(0 0 28px rgba(251,92,92,.2))}
+  100%{stroke-opacity:1;filter:drop-shadow(0 0 6px var(--rdgl))}
+}
+.gauge-fill.alert-max{animation:alertRingPulse 1.2s ease-in-out infinite}
+.fan-svg{width:110px;height:110px;position:absolute;top:5px;left:5px}
+.fan-ring{fill:none;stroke:var(--tm);stroke-width:1.5;opacity:.25;transition:all .5s}
+.fan-box.on .fan-ring{stroke:var(--rd);opacity:.6;filter:drop-shadow(0 0 4px var(--rdgl))}
+.fan-bl{transform-origin:55px 55px;color:#5a6a82;transition:color .5s}.fan-box.on .fan-bl{color:var(--rd);filter:drop-shadow(0 0 5px var(--rdgl))}
+.fan-bl.spin{animation:spin .3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fl{font-family:'IBM Plex Mono',monospace;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;transition:color .4s;margin-top:6px}
+.fan-box.on .fl{color:var(--rd)}.fan-box.off .fl{color:var(--gn)}
+.frl{margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:.6rem;color:var(--tm);min-height:15px}
+@keyframes shake{0%,100%{transform:translateX(0)}10%,50%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(2px)}}.shake{animation:shake .4s ease}
+
+/* ═══ FORMULA ═══ */
+.fw{margin-bottom:16px}
+.fbar{display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;background:var(--gl);border:1px solid var(--gb);border-radius:10px;font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;flex-wrap:wrap}
+.feq{color:var(--tm)}.fop{color:var(--tm);font-weight:300}
+.ft{padding:4px 12px;border-radius:7px;border:1.5px solid transparent;transition:all .4s cubic-bezier(.16,1,.3,1);color:var(--tm)}
+
+/* ═══ KMAP ═══ */
+.kh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kh span{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--tm)}
+.kvt{display:flex;gap:2px;background:rgba(8,12,20,.6);border:1px solid var(--gb);border-radius:8px;padding:3px;position:relative}
+.kvt button{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.05em;padding:5px 10px;border:none;border-radius:5px;cursor:pointer;color:var(--tm);background:transparent;transition:color .25s, background .25s, box-shadow .25s;text-transform:uppercase}
+.kvt button:hover{color:var(--td)}
+.kvt button.active{background:color-mix(in srgb,var(--cy) 15%,transparent);color:var(--cy);box-shadow:inset 0 0 0 1px var(--cyd),0 0 10px rgba(34,211,238,.1)}
+.km{display:grid;grid-template-columns:auto repeat(4,1fr);gap:3px;font-family:'IBM Plex Mono',monospace;text-align:center}
+.km .hdr{padding:8px 6px;font-size:.75rem;color:var(--cy);font-weight:600;display:flex;align-items:center;justify-content:center}
+.km .corner{font-size:.65rem;color:var(--tm)}
+.km .cell{padding:12px 6px;background:var(--gl);border:1.5px solid var(--gb);border-radius:8px;font-size:.95rem;font-weight:600;transition:all .35s cubic-bezier(.16,1,.3,1);position:relative;cursor:pointer;overflow:hidden}
+.km .cell.v1{color:var(--tx)}.km .cell.v0{color:var(--tm);font-weight:400}
+.km .cell:hover{transform:scale(1.06);z-index:3;border-color:rgba(255,255,255,.12)}
+.km .cell .crip{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);transform:scale(0);pointer-events:none}
+.km .cell .crip.go{animation:rip .5s ease-out forwards}
+.km .cell.cur{border-color:rgba(255,255,255,.65);z-index:4;box-shadow:0 0 24px rgba(255,255,255,.14),inset 0 0 0 1px rgba(255,255,255,.1);transform:scale(1.1)}
+.km.ng .cell{background:var(--gl)!important;border-color:var(--gb)!important}
+.tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a2438;border:1px solid var(--gb);border-radius:8px;padding:6px 10px;font-size:.72rem;color:var(--td);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;z-index:10;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a2438}
+.km .cell:hover .tip{opacity:1}
+.legend{display:flex;gap:12px;margin-top:10px;flex-wrap:wrap}
+.lg{display:flex;align-items:center;gap:5px;font-size:.72rem;font-family:'IBM Plex Mono',monospace;color:var(--td)}
+.ld{width:10px;height:10px;border-radius:3px;border:2px solid}
+
+/* ═══ TABLE ═══ */
+.tts{max-height:520px;overflow-y:auto;border:1px solid var(--gb);border-radius:10px;background:var(--gl)}
+.tts::-webkit-scrollbar{width:4px}.tts::-webkit-scrollbar-track{background:transparent}.tts::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:4px}
+.tt{width:100%;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:.82rem;text-align:center}
+.tt thead{position:sticky;top:0;z-index:2}
+.tt thead th{padding:8px 5px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--cy);background:var(--s2);border-bottom:1px solid var(--gb)}
+.tt tbody td{padding:5px 4px;border-bottom:1px solid rgba(255,255,255,.025);color:var(--tm);transition:all .3s}
+.tt tbody tr{transition:all .35s}.tt tbody tr:hover td{background:rgba(255,255,255,.015)}
+.tt tbody tr.cur td{background:var(--cyg);color:var(--tx);font-weight:600}
+.tt .s1{color:var(--rd);font-weight:700}.tt .s0{color:var(--tm)}
+.rt{font-size:.56rem;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.03);color:var(--tm)}
+.tt tbody tr.cur .rt{background:rgba(34,211,238,.08);color:var(--cy)}
+
+/* ═══ BAND — despromoted sections (no card wrapper) ═══ */
+.band{grid-column:1/-1;margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.05);animation:fu .6s cubic-bezier(.16,1,.3,1) both}
+.band-head{display:flex;align-items:baseline;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.band-head h3{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--td);margin:0}
+.band-head .band-sub{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--tm);line-height:1.5}
+
+/* ═══ LOGIC GATE DIAGRAM ═══ */
+.gate-section{grid-column:1/-1;margin-top:4px}
+.gate-canvas{background:linear-gradient(180deg,rgba(8,12,22,.75),rgba(6,10,18,.85));border:1px solid var(--gb);border-radius:12px;padding:22px 20px;overflow-x:auto;position:relative;backdrop-filter:blur(4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),inset 0 0 40px rgba(34,211,238,.02)}
+/* Grid pattern */
+.gate-canvas::before{content:'';position:absolute;inset:0;border-radius:12px;opacity:.45;background-image:linear-gradient(rgba(34,211,238,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.03) 1px,transparent 1px);background-size:28px 28px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 50%,transparent 100%);-webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 50%,#000 50%,transparent 100%)}
+.gate-svg{width:100%;max-width:920px;margin:0 auto;display:block;position:relative;z-index:1}
+.gate-svg text{font-family:'IBM Plex Mono',monospace}
+/* Gate Simulation Bar — HUD control strip */
+.gate-sim-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px;background:linear-gradient(90deg,rgba(34,211,238,.04),rgba(167,139,250,.03),rgba(34,211,238,.04));border:1px solid var(--gb);border-radius:10px;position:relative;overflow:hidden}
+.gate-sim-bar::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--cy),var(--vio));box-shadow:0 0 10px var(--cygl)}
+.gate-sim-label{font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:var(--cy);text-transform:uppercase;letter-spacing:.08em;margin-right:4px;white-space:nowrap;opacity:.85;display:inline-flex;align-items:center;gap:6px}
+.gate-sim-label::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--cy);box-shadow:0 0 8px var(--cygl);animation:pulse 2s ease infinite}
+.gsb-icon{font-size:.82rem}
+@media(max-width:600px){.gate-sim-bar{justify-content:center}.gate-sim-label{width:100%;text-align:center;justify-content:center}}
+
+/* ═══ Wires — NEON CONDUIT style ═══ */
+.wire{stroke:rgba(74,94,122,.22);stroke-width:4.5;fill:none;transition:stroke .4s,opacity .4s, filter .4s;stroke-linecap:round;stroke-linejoin:round}
+.wire.hot{stroke:var(--cy);opacity:1;filter:drop-shadow(0 0 6px var(--cygl)) drop-shadow(0 0 14px rgba(34,211,238,.15))}
+.wire.hot-out{stroke:var(--rd);opacity:1;filter:drop-shadow(0 0 7px var(--rdgl)) drop-shadow(0 0 16px rgba(251,92,92,.18))}
+/* Inner bright highlight */
+.wire-highlight{fill:none;stroke:rgba(255,255,255,.06);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.wire-highlight.hot{stroke:rgba(255,255,255,.55)}
+.wire-highlight.hot-out{stroke:rgba(255,255,255,.55)}
+/* Animated dash overlay — data flow */
+.wire-flow{fill:none;stroke-width:2.2;stroke-dasharray:6 12;opacity:0;transition:opacity .3s;stroke-linecap:round;stroke-linejoin:round}
+.wire-flow.hot{stroke:rgba(255,255,255,.8);opacity:.9;animation:dash .7s linear infinite}
+.wire-flow.hot-out{stroke:rgba(255,255,255,.85);opacity:.95;animation:dash .55s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-36}}
+
+/* Gate shapes — holographic neon look */
+.gate-shape{stroke:rgba(120,150,200,.45);stroke-width:1.4;transition:stroke .4s, stroke-width .4s, filter .5s;filter:drop-shadow(0 0 3px rgba(34,211,238,.08))}
+.gate-shape.active{stroke:var(--cy);stroke-width:1.8;filter:drop-shadow(0 0 8px var(--cygl)) drop-shadow(0 0 18px rgba(34,211,238,.18))}
+.gate-shape.active-out{stroke:var(--rd);stroke-width:1.8;filter:drop-shadow(0 0 8px var(--rdgl)) drop-shadow(0 0 18px rgba(251,92,92,.18))}
+.gate-inner{transition:opacity .5s;pointer-events:none;opacity:.35}
+/* Chip emboss — now nearly invisible since we're going holographic */
+.gate-emboss{pointer-events:none;transition:opacity .5s;opacity:.3}
+.gate-lbl{fill:rgba(180,200,228,.75);font-size:12px;font-weight:700;letter-spacing:.08em;transition:fill .4s, filter .4s}
+.gate-lbl.active{fill:var(--cy);filter:drop-shadow(0 0 6px var(--cygl))}
+.gate-lbl.active-out{fill:var(--rd);filter:drop-shadow(0 0 6px var(--rdgl))}
+.gate-sub{fill:var(--tm);font-size:8.5px;opacity:.55;letter-spacing:.04em}
+/* Neon under-glow rect */
+.gate-underglow{pointer-events:none;opacity:0;transition:opacity .5s}
+.gate-underglow.active{opacity:1}
+.gate-underglow.active-out{opacity:1}
+/* Input nodes — holographic terminals */
+.in-node{transition:all .5s}
+.in-node .ring{fill:none;stroke:rgba(74,94,122,.45);stroke-width:1.4;transition:stroke .4s, filter .4s}
+.in-node .core{fill:var(--tm);transition:fill .4s, filter .4s}
+.in-node.on .ring{stroke:var(--cy);stroke-width:1.8;filter:drop-shadow(0 0 8px var(--cygl)) drop-shadow(0 0 16px rgba(34,211,238,.2))}
+.in-node.on .core{fill:var(--cy);filter:drop-shadow(0 0 5px var(--cygl))}
+.in-lbl{font-size:12px;font-weight:700;letter-spacing:.08em;fill:var(--tm);transition:fill .4s, filter .4s}
+.in-lbl.on{fill:var(--cy);filter:drop-shadow(0 0 5px var(--cygl))}
+.in-sub{font-size:7.5px;fill:var(--tm);opacity:.5;letter-spacing:.04em}
+/* Output pulse */
+.out-pulse{fill:none;stroke:var(--rd);stroke-width:2;opacity:0;transition:opacity .4s}
+.out-pulse.on{opacity:1;animation:outP 1.5s ease infinite}
+@keyframes outP{0%{r:22;opacity:.6}100%{r:38;opacity:0}}
+/* Connection junction dots — glow when active */
+.junc{fill:rgba(74,94,122,.6);transition:fill .4s, filter .4s;r:2.5}
+.junc.on{fill:var(--cy);filter:drop-shadow(0 0 5px var(--cygl))}
+/* Negation bubble */
+.neg-bub{fill:var(--bg);stroke:var(--tm);stroke-width:1.4;transition:stroke .4s, filter .4s}
+.neg-bub.on{stroke:var(--cy);filter:drop-shadow(0 0 4px var(--cygl))}
+
+/* ═══ HUD PANEL — base readout surface with corner brackets ═══ */
+.hud-panel,.canon-box,.step{
+  --hud-acc:var(--cy);--hud-acc-gl:var(--cygl);--hud-acc-d:var(--cyd);
+  position:relative;background:linear-gradient(180deg,rgba(10,14,24,.75),rgba(8,12,20,.82));
+  border:1px solid var(--gb);padding:18px 20px;overflow:hidden;backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+/* Angular clip for outer shape */
+.hud-panel,.canon-box,.step{
+  clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+}
+/* Corner brackets — top-left + bottom-right (signature HUD) */
+.hud-panel::before,.canon-box::before,.step::before{
+  content:'';position:absolute;top:4px;left:4px;width:14px;height:14px;
+  border-top:1px solid var(--hud-acc);border-left:1px solid var(--hud-acc);
+  box-shadow:-1px -1px 6px var(--hud-acc-gl);
+  pointer-events:none;
+}
+.hud-panel::after,.canon-box::after,.step::after{
+  content:'';position:absolute;bottom:4px;right:4px;width:14px;height:14px;
+  border-bottom:1px solid var(--hud-acc);border-right:1px solid var(--hud-acc);
+  box-shadow:1px 1px 6px var(--hud-acc-gl);
+  pointer-events:none;
+}
+/* Subtle top scanline accent on HUD panels */
+.hud-panel > .hud-stripe,.canon-box > .hud-stripe{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--hud-acc-gl),transparent)}
+
+/* ═══ CANONICAL ═══ */
+.canon-section{grid-column:1/-1;margin-top:4px}
+.canon-compare{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:stretch}
+@media(max-width:720px){.canon-compare{grid-template-columns:1fr;text-align:center}}
+.canon-box.expanded{--hud-acc:var(--rd);--hud-acc-gl:var(--rdgl);--hud-acc-d:var(--rdd);background:linear-gradient(180deg,rgba(30,10,14,.6),rgba(16,10,14,.8))}
+.canon-box.simplified{--hud-acc:var(--gn);--hud-acc-gl:var(--gngl);--hud-acc-d:rgba(45,212,168,.55);background:linear-gradient(180deg,rgba(8,24,20,.6),rgba(8,16,14,.8))}
+.canon-label{font-family:'IBM Plex Mono',monospace;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--hud-acc);padding-left:16px;position:relative}
+.canon-label::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--hud-acc);box-shadow:0 0 10px var(--hud-acc-gl);animation:pulse 2s ease infinite}
+.canon-label .tag{font-size:.6rem;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid var(--hud-acc-d);color:var(--hud-acc);letter-spacing:.06em;margin-left:auto}
+.canon-terms{display:flex;flex-wrap:nowrap;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:.78rem;line-height:1.8;align-items:center;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:var(--hud-acc-d) transparent}
+.canon-terms::-webkit-scrollbar{height:4px}
+.canon-terms::-webkit-scrollbar-track{background:transparent}
+.canon-terms::-webkit-scrollbar-thumb{background:var(--hud-acc-d);border-radius:4px}
+.mterm{padding:4px 8px;border:1px solid transparent;color:var(--td);transition:color .3s,background .3s,border-color .3s,box-shadow .3s;white-space:nowrap;cursor:default;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.mterm .bar{text-decoration:overline}
+.mterm.active{color:var(--cy);border-color:var(--cyd);background:color-mix(in srgb,var(--cy) 12%,transparent);box-shadow:0 0 12px var(--cygl),inset 0 0 10px rgba(34,211,238,.08)}
+.mterm-plus{color:var(--tm);font-weight:300;font-size:.7rem;margin:0 2px}
+.canon-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--cy);font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase}
+.canon-arrow svg{width:40px;height:40px;color:var(--cy);filter:drop-shadow(0 0 6px var(--cygl))}
+.canon-arrow span{color:var(--gn);font-weight:600}
+@media(max-width:720px){.canon-arrow{flex-direction:row;gap:8px}.canon-arrow svg{width:32px;height:32px;transform:rotate(90deg)}}
+.canon-simp-terms{display:flex;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:1rem;font-weight:600;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.sft{padding:5px 12px;border:1px solid;transition:all .4s;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px)}
+.sfop{color:var(--tm);font-weight:300}
+.feq{color:var(--tm);font-weight:500}
+
+/* Stats block — HUD readout */
+.canon-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--gb)}
+@media(max-width:520px){.canon-stats{grid-template-columns:repeat(2,1fr)}}
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;padding:8px 4px;background:rgba(255,255,255,.01);border:1px solid rgba(255,255,255,.03);border-radius:6px;position:relative}
+.stat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:1px;background:var(--hud-acc-gl)}
+.stat-val{font-size:1.5rem;font-weight:700;line-height:1;letter-spacing:-.02em}
+.stat-val.bad{color:var(--rd);text-shadow:0 0 12px rgba(251,92,92,.3)}
+.stat-val.good{color:var(--gn);text-shadow:0 0 12px rgba(45,212,168,.3)}
+.stat-lbl{font-size:.58rem;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;font-weight:500}
+
+/* ═══ EXPLAINER — Implicantes primos em HUD mini-panels ═══ */
+.explain{grid-column:1/-1;margin-top:4px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+@media(max-width:720px){.steps{grid-template-columns:1fr}}
+.step{padding:14px 18px 16px;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s ease}
+.step:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.35),0 0 18px var(--hud-acc-gl)}
+.step-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-family:'IBM Plex Mono',monospace}
+.step-num{font-size:.6rem;color:var(--hud-acc);opacity:.75;letter-spacing:.12em;font-weight:600}
+.step-type{font-size:.58rem;color:var(--tm);text-transform:uppercase;letter-spacing:.1em;padding:2px 8px;border:1px solid var(--gb);background:rgba(255,255,255,.02);clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
+.step h4{font-family:'IBM Plex Mono',monospace;font-size:.88rem;margin-bottom:10px;letter-spacing:.02em;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px dashed var(--gb);text-shadow:0 0 10px currentColor}
+.step p{font-size:.8rem;color:var(--td);line-height:1.7;margin:0 0 10px 0}
+.step p strong{color:var(--tx);font-weight:600}
+.step code{font-family:'IBM Plex Mono',monospace;font-size:.76rem;padding:2px 7px;background:rgba(255,255,255,.02);border:1px solid var(--gb);color:var(--tx);clip-path:polygon(3px 0,100% 0,100% calc(100% - 3px),calc(100% - 3px) 100%,0 100%,0 3px)}
+.step .res{margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;padding:5px 12px;letter-spacing:.04em;display:inline-block;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);border:1px solid currentColor}
+
+.foot{text-align:center;padding:28px 20px 12px;font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--tm)}.foot span{color:var(--cy)}
+.fade-up{opacity:0;transform:translateY(18px);animation:fu .6s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes fu{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}.d5{animation-delay:.5s}
+</style>
+</head>
+<body>
+<canvas id="bgc"></canvas>
+<div class="page">
+
+<!-- ═══ HERO — COMPACT INSTRUMENT BAR ═══ -->
+<div class="hero fade-up">
+  <div class="hero-left">
+    <div class="hbadge"><span class="dot"></span> UFFS — Lóg. Mat. Discreta</div>
+    <h1>Sistema Termal · Rig <span class="accent">Monero</span></h1>
+    <span class="hero-expr" id="heroExpr">S = A + BC + CD</span>
+  </div>
+  <div class="bin-display" role="status" aria-live="polite" aria-label="Estado binário dos sensores">
+    <div class="bin-bit off" id="bA"><span class="lbl">A</span><span class="bv">0</span></div>
+    <div class="bin-bit off" id="bB"><span class="lbl">B</span><span class="bv">0</span></div>
+    <div class="bin-bit off" id="bC"><span class="lbl">C</span><span class="bv">0</span></div>
+    <div class="bin-bit off" id="bD"><span class="lbl">D</span><span class="bv">0</span></div>
+    <div class="bin-sep">→</div>
+    <div class="bin-out off" id="bS" aria-label="Resultado S">0</div>
+  </div>
+</div>
+
+<!-- ═══ GRID ═══ -->
+<div class="grid">
+
+<!-- COL 1: SENSORS + SCENARIOS + FAN -->
+<div class="col-s">
+<div class="card fade-up d1">
+  <div class="ch"><span class="cn">1</span><span class="ct">Sensores</span></div>
+  <div class="cdesc">Alterne manualmente ou use os cenários abaixo</div>
+  <div class="sensor" id="row-A" onclick="ripS(event,this)"><div class="si"><span class="sn"><span class="sd"></span> A — Temp. CPU</span><span class="ss">0 = Segura · 1 = Crítica</span></div><label class="tgl"><input type="checkbox" id="A" onchange="handleSensor()" role="switch" aria-label="Sensor A — Temperatura CPU"><span class="tk"></span></label></div>
+  <div class="sensor" id="row-B" onclick="ripS(event,this)"><div class="si"><span class="sn"><span class="sd"></span> B — Temp. VRM</span><span class="ss">0 = Segura · 1 = Crítica</span></div><label class="tgl"><input type="checkbox" id="B" onchange="handleSensor()" role="switch" aria-label="Sensor B — Temperatura VRM"><span class="tk"></span></label></div>
+  <div class="sensor" id="row-C" onclick="ripS(event,this)"><div class="si"><span class="sn"><span class="sd"></span> C — Mineração</span><span class="ss">0 = Ocioso · 1 = Minerando</span></div><label class="tgl"><input type="checkbox" id="C" onchange="handleSensor()" role="switch" aria-label="Sensor C — Mineração"><span class="tk"></span></label></div>
+  <div class="sensor" id="row-D" onclick="ripS(event,this)"><div class="si"><span class="sn"><span class="sd"></span> D — Temp. Ambiente</span><span class="ss">0 = Frio · 1 = Quente</span></div><label class="tgl"><input type="checkbox" id="D" onchange="handleSensor()" role="switch" aria-label="Sensor D — Temperatura Ambiente"><span class="tk"></span></label></div>
+
+  <!-- SCENARIO CHIPS -->
+  <div class="scenarios">
+    <div class="scenarios-label">Cenários Rápidos</div>
+    <div class="scenario-grid">
+      <button class="sbtn btn btn-sm" onclick="setSc(1,0,0,0,this)" aria-pressed="false" title="CPU Crítica"><span class="sbtn-name">A</span></button>
+      <button class="sbtn btn btn-sm" onclick="setSc(0,1,1,0,this)" aria-pressed="false" title="VRM + Mineração"><span class="sbtn-name">BC</span></button>
+      <button class="sbtn btn btn-sm" onclick="setSc(0,0,1,1,this)" aria-pressed="false" title="Mineração + Calor"><span class="sbtn-name">CD</span></button>
+      <button class="sbtn btn btn-sm" onclick="setSc(1,1,1,1,this)" aria-pressed="false" title="Alerta Máximo"><span class="sbtn-name">ABCD</span></button>
+      <button class="sbtn btn btn-sm" onclick="setSc(0,0,0,0,this)" aria-pressed="false" title="Todos desligados"><span class="sbtn-name">Reset</span></button>
+    </div>
+  </div>
+
+  <!-- FAN -->
+  <div class="fan-box off" id="fbox" role="status" aria-live="polite" aria-label="Estado do exaustor: Sistema seguro">
+    <div class="pts" id="pts"></div>
+    <!-- Wind streaks -->
+    <div class="wind-streak" style="top:22%;left:10%;animation-delay:0s"></div>
+    <div class="wind-streak" style="top:38%;left:60%;animation-delay:.3s;width:18px"></div>
+    <div class="wind-streak" style="top:55%;left:25%;animation-delay:.6s;width:30px"></div>
+    <div class="wind-streak" style="top:70%;left:55%;animation-delay:.9s;width:20px"></div>
+    <div class="wind-streak" style="top:82%;left:15%;animation-delay:1.1s"></div>
+    <div class="fan-wrap"><div class="fan-glow"></div>
+      <div class="gauge-ring"><svg viewBox="0 0 126 126"><circle class="gauge-track" cx="63" cy="63" r="60" pathLength="360"/><circle class="gauge-fill" id="gauge" cx="63" cy="63" r="60" pathLength="360" stroke-dasharray="360" stroke-dashoffset="360"/></svg></div>
+      <svg class="fan-svg" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+        <circle class="fan-ring" cx="55" cy="55" r="52"/>
+        <circle class="fan-ring" cx="55" cy="55" r="46" stroke-dasharray="4 6"/>
+        <defs>
+          <linearGradient id="bladeGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="currentColor" stop-opacity="1"/>
+            <stop offset="60%" stop-color="currentColor" stop-opacity=".85"/>
+            <stop offset="100%" stop-color="currentColor" stop-opacity=".65"/>
+          </linearGradient>
+        </defs>
+        <g id="fbl" class="fan-bl">
+          <path d="M55,55 C50,40 40,16 55,10 C70,16 60,40 55,55Z" fill="url(#bladeGrad)"/>
+          <path d="M55,55 C50,40 40,16 55,10 C70,16 60,40 55,55Z" fill="url(#bladeGrad)" transform="rotate(72 55 55)"/>
+          <path d="M55,55 C50,40 40,16 55,10 C70,16 60,40 55,55Z" fill="url(#bladeGrad)" transform="rotate(144 55 55)"/>
+          <path d="M55,55 C50,40 40,16 55,10 C70,16 60,40 55,55Z" fill="url(#bladeGrad)" transform="rotate(216 55 55)"/>
+          <path d="M55,55 C50,40 40,16 55,10 C70,16 60,40 55,55Z" fill="url(#bladeGrad)" transform="rotate(288 55 55)"/>
+          <circle cx="55" cy="55" r="10" fill="currentColor"/><circle cx="55" cy="55" r="4.5" fill="var(--bg)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="fl" id="flbl">Sistema Seguro</div>
+    <div class="frl" id="frule">Nenhuma regra acionada</div>
+  </div>
+</div>
+</div>
+
+<!-- COL 2: KMAP -->
+<div class="col-k">
+<div class="card fade-up d2">
+  <span class="kmap-bracket-bl" aria-hidden="true"></span>
+  <div class="ch"><span class="cn">2</span><span class="ct">Mapa de Karnaugh</span></div>
+  <div class="cdesc">Agrupamentos e simplificação booleana</div>
+  <!-- Expression Input -->
+  <div class="expr-wrap">
+    <div class="expr-row">
+      <input id="exprInput" class="expr-input" type="text" value="A + BC + CD"
+             placeholder="Ex: A + BC + !AD" spellcheck="false"
+             aria-label="Expressão booleana SOP">
+      <button id="exprApply" class="btn btn-md" aria-label="Aplicar expressão">⏎ Aplicar</button>
+    </div>
+    <div id="exprError" class="expr-error-msg" aria-live="polite"></div>
+  </div>
+  <!-- Formula bar (dynamic) -->
+  <div class="fw"><div class="fbar" id="formulaBar"></div></div>
+  <div class="kh"><span>AB ↓ &nbsp; CD →</span><div class="kvt"><button class="active" onclick="setView('g',this)">Grupos</button><button onclick="setView('c',this)">Limpo</button></div></div>
+  <div class="km" id="km" role="grid" aria-label="Mapa de Karnaugh 4x4"></div>
+  <div class="legend" id="kLegend"></div>
+</div>
+</div>
+
+<!-- COL 3: TABLE -->
+<div class="col-t">
+<div class="card fade-up d3">
+  <div class="ch"><span class="cn">3</span><span class="ct">Tabela-Verdade</span></div>
+  <div class="cdesc" id="ttDesc">2⁴ = 16 combinações possíveis</div>
+  <div class="tts"><table class="tt" role="table" aria-label="Tabela-Verdade"><thead><tr><th scope="col">#</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">D</th><th scope="col">S</th><th scope="col">Regra</th></tr></thead><tbody id="ttb"></tbody></table></div>
+</div>
+</div>
+
+<!-- ═══ LOGIC GATE DIAGRAM — banda ═══ -->
+<div class="band gate-section d4">
+  <div class="band-head">
+    <h3>Diagrama de Portas Lógicas</h3>
+    <span class="band-sub">Circuito otimizado — sinais viajam em tempo real</span>
+  </div>
+  <!-- Interactive Gate Simulation Buttons -->
+  <div class="gate-sim-bar" id="gateSimBar">
+    <span class="gate-sim-label">Simular Portas</span>
+    <button class="btn btn-sm" onclick="setSc(1,0,0,0,null)" aria-label="Ativar sensor A">Ativar A</button>
+    <button class="btn btn-sm" onclick="setSc(0,1,1,0,null)" aria-label="Ativar sensores B e C">Ativar BC</button>
+    <button class="btn btn-sm" onclick="setSc(0,0,1,1,null)" aria-label="Ativar sensores C e D">Ativar CD</button>
+    <button class="btn btn-sm" onclick="setSc(1,1,1,1,null)" aria-label="Ativar todos os sensores">Ativar ABCD</button>
+    <button class="btn btn-sm" onclick="setSc(0,0,0,0,null)" aria-label="Desligar todos os sensores">Reset</button>
+  </div>
+  <div class="gate-canvas">
+    <svg class="gate-svg" id="gateSvg" viewBox="0 0 920 300" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<!-- ═══ CANONICAL — banda ═══ -->
+<div class="band canon-section d4">
+  <div class="band-head">
+    <h3>Expressão Canônica vs. Simplificada</h3>
+    <span class="band-sub" id="canonDesc">Soma de mintermos reduzida pelo Mapa de Karnaugh</span>
+  </div>
+  <div class="canon-compare" id="canonCompare"></div>
+</div>
+
+<!-- ═══ EXPLAINER — banda ═══ -->
+<div class="band explain d5">
+  <div class="band-head">
+    <h3>Simplificação — Implicantes Primos</h3>
+  </div>
+  <div class="steps" id="explainerSteps"></div>
+</div>
+
+</div><!-- close grid -->
+
+<div class="foot fade-up d5">Carlos Henrique - Daniel Telecken · UFFS Erechim · Lógica e Matemática Discreta · <span id="footExpr">S = A + BC + CD</span></div>
+</div>
+
+<!-- Screen reader live region -->
+<div id="srAnnounce" class="sr-only" aria-live="assertive" role="status"></div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  1. BACKGROUND CANVAS                                       ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+(function(){const c=document.getElementById('bgc'),x=c.getContext('2d');let w,h;function rs(){w=c.width=innerWidth;h=c.height=innerHeight}rs();addEventListener('resize',rs);const dots=[];for(let i=0;i<45;i++)dots.push({x:Math.random()*2e3,y:Math.random()*2e3,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,r:Math.random()*1.2+.4});let mx=w/2,my=h/2;document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});function draw(){x.clearRect(0,0,w,h);const ox=(mx-w/2)*.012,oy=(my-h/2)*.012;x.save();x.translate(ox,oy);x.strokeStyle='rgba(34,211,238,.02)';x.lineWidth=.5;const s=90;for(let i=-s;i<w+s;i+=s){x.beginPath();x.moveTo(i,0);x.lineTo(i,h);x.stroke()}for(let i=-s;i<h+s;i+=s){x.beginPath();x.moveTo(0,i);x.lineTo(w,i);x.stroke()}x.restore();dots.forEach(d=>{d.x+=d.vx;d.y+=d.vy;if(d.x<0)d.x=w;if(d.x>w)d.x=0;if(d.y<0)d.y=h;if(d.y>h)d.y=0;x.beginPath();x.arc(d.x+ox*.5,d.y+oy*.5,d.r,0,Math.PI*2);x.fillStyle='rgba(34,211,238,.08)';x.fill()});for(let i=0;i<dots.length;i++)for(let j=i+1;j<dots.length;j++){const dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<140){x.beginPath();x.moveTo(dots[i].x+ox*.5,dots[i].y+oy*.5);x.lineTo(dots[j].x+ox*.5,dots[j].y+oy*.5);x.strokeStyle=`rgba(34,211,238,${.03*(1-dist/140)})`;x.stroke()}}requestAnimationFrame(draw)}draw()})();
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  2. FAN PARTICLES                                            ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+(function(){const b=document.getElementById('pts');for(let i=0;i<18;i++){const p=document.createElement('div');p.className='pt';p.style.left=Math.random()*100+'%';p.style.animationDelay=Math.random()*2+'s';p.style.animationDuration=(1.4+Math.random()*1.5)+'s';b.appendChild(p)}})();
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  3. EXPRESSION PARSER                                        ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+// Shared sensor helpers keep the UI controls and model updates in sync.
+const SENSOR_KEYS = ['A','B','C','D'];
+
+function readSensorInputs() {
+  const sensorState = {};
+  SENSOR_KEYS.forEach(sensorKey => {
+    sensorState[sensorKey] = document.getElementById(sensorKey).checked;
+  });
+  return sensorState;
+}
+
+function writeSensorInputs(sensorState) {
+  const normalizedState = {};
+  SENSOR_KEYS.forEach(sensorKey => {
+    const value = !!sensorState[sensorKey];
+    normalizedState[sensorKey] = value;
+    document.getElementById(sensorKey).checked = value;
+  });
+  return normalizedState;
+}
+
+function updateScenarioButtons(activeButton) {
+  document.querySelectorAll('.sbtn').forEach(button => {
+    const isActive = button === activeButton;
+    button.classList.toggle('picked', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+function parseExpression(str) {
+  str = str.trim().toUpperCase();
+  if (!str) throw new Error('Expressão vazia');
+  const termStrs = str.split('+').map(t => t.trim()).filter(t => t.length > 0);
+  if (termStrs.length === 0) throw new Error('Expressão vazia');
+  return termStrs.map((raw, ti) => {
+    let ts = raw.replace(/\*/g, '').replace(/\s+/g, '');
+    const literals = [];
+    let i = 0;
+    while (i < ts.length) {
+      let neg = false;
+      if (ts[i] === '!') { neg = true; i++; }
+      if (i >= ts.length) throw new Error(`Negação sem variável no termo ${ti+1}`);
+      const v = ts[i];
+      if (!'ABCD'.includes(v)) throw new Error(`Variável inválida: "${v}". Use apenas A, B, C ou D`);
+      i++;
+      if (i < ts.length && ts[i] === "'") { neg = !neg; i++; }
+      literals.push({ name: v, negated: neg });
+    }
+    if (literals.length === 0) throw new Error(`Termo ${ti+1} vazio`);
+    return { literals };
+  });
+}
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  4. LOGIC MODEL                                              ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+const TERM_COLORS = [
+  { base:'#22d3ee', bg:'rgba(34,211,238,.09)',  border:'rgba(34,211,238,.38)',  glow:'rgba(34,211,238,.14)' },
+  { base:'#a78bfa', bg:'rgba(167,139,250,.09)', border:'rgba(167,139,250,.38)', glow:'rgba(167,139,250,.14)' },
+  { base:'#34d399', bg:'rgba(52,211,153,.09)',  border:'rgba(52,211,153,.38)',  glow:'rgba(52,211,153,.14)' },
+  { base:'#38bdf8', bg:'rgba(56,189,248,.09)',  border:'rgba(56,189,248,.38)',  glow:'rgba(56,189,248,.14)' },
+  { base:'#e879f9', bg:'rgba(232,121,249,.09)', border:'rgba(232,121,249,.38)', glow:'rgba(232,121,249,.14)' },
+  { base:'#fb7185', bg:'rgba(251,113,133,.09)', border:'rgba(251,113,133,.38)', glow:'rgba(251,113,133,.14)' },
+  { base:'#5eead4', bg:'rgba(94,234,212,.09)',  border:'rgba(94,234,212,.38)',  glow:'rgba(94,234,212,.14)' },
+  { base:'#818cf8', bg:'rgba(129,140,248,.09)', border:'rgba(129,140,248,.38)', glow:'rgba(129,140,248,.14)' },
+];
+
+class LogicModel {
+  constructor() {
+    this.expression = '';
+    this.terms = [];
+    this.truthTable = [];
+    this.groups = {};
+    this.sensors = { A:false, B:false, C:false, D:false };
+  }
+  setExpression(str) {
+    this.terms = parseExpression(str);
+    this.expression = str.trim().toUpperCase();
+    this._computeTruthTable();
+    this._computeGroups();
+  }
+  color(i) { return TERM_COLORS[i % TERM_COLORS.length]; }
+  evaluate(A,B,C,D) {
+    const v = {A:!!A,B:!!B,C:!!C,D:!!D};
+    for (const t of this.terms) {
+      let ok = true;
+      for (const l of t.literals) { if (l.negated ? v[l.name] : !v[l.name]) { ok=false; break; } }
+      if (ok) return 1;
+    }
+    return 0;
+  }
+  evalTerm(ti,A,B,C,D) {
+    const v = {A:!!A,B:!!B,C:!!C,D:!!D};
+    const t = this.terms[ti]; if(!t) return false;
+    for (const l of t.literals) { if (l.negated ? v[l.name] : !v[l.name]) return false; }
+    return true;
+  }
+  activeTerms(A,B,C,D) {
+    const r = [];
+    for (let i=0;i<this.terms.length;i++) if(this.evalTerm(i,A,B,C,D)) r.push(i);
+    return r;
+  }
+  termLabel(i) { return this.terms[i].literals.map(l=>(l.negated?'!':'')+l.name).join(''); }
+  termDisplayHTML(i) { return this.terms[i].literals.map(l=>l.negated?`<span class="bar">${l.name}</span>`:l.name).join(''); }
+  termDisplayText(i) { return this.terms[i].literals.map(l=>l.negated?l.name+'\u0304':l.name).join(''); }
+  _computeTruthTable() {
+    this.truthTable = [];
+    for (let n=0;n<16;n++) {
+      const b=n.toString(2).padStart(4,'0'), v=b.split('').map(Number);
+      const S=this.evaluate(...v), at=this.activeTerms(...v);
+      this.truthTable.push({index:n,binary:b,A:v[0],B:v[1],C:v[2],D:v[3],S,activeTerms:at});
+    }
+  }
+  _computeGroups() {
+    this.groups = {};
+    for (let t=0;t<this.terms.length;t++) {
+      const matches = [];
+      for (let n=0;n<16;n++) {
+        const b=n.toString(2).padStart(4,'0'), v=b.split('').map(Number);
+        if (this.evalTerm(t,...v)) matches.push(b);
+      }
+      this.groups['g'+t] = matches;
+    }
+  }
+  setSensors(s) { Object.assign(this.sensors, s); }
+  get S() { const{A,B,C,D}=this.sensors; return this.evaluate(A,B,C,D); }
+  get curActiveTerms() { const{A,B,C,D}=this.sensors; return this.activeTerms(A,B,C,D); }
+  get mintermCount() { return this.truthTable.filter(r=>r.S===1).length; }
+}
+
+const gray = ['00','01','11','10'];
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  5. DOT POOL (rAF-optimized SVG particle system)            ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+class DotPool {
+  constructor(layer, size) {
+    this.layer = layer;
+    this.pool = [];
+    this.rafId = null;
+    const ns = 'http://www.w3.org/2000/svg';
+    for (let i = 0; i < (size||24); i++) {
+      const el = document.createElementNS(ns, 'circle');
+      el.setAttribute('r', '4');
+      el.style.opacity = '0';
+      el.style.willChange = 'offset-distance,opacity';
+      layer.appendChild(el);
+      this.pool.push({ el, inUse: false, t0: 0, dur: 0, isOut: false });
+    }
+  }
+  fire(pathD, speed, isOut) {
+    const s = this.pool.find(p => !p.inUse);
+    if (!s) return;
+    s.inUse = true;
+    s.t0 = performance.now();
+    s.dur = speed * 1000;
+    s.isOut = isOut;
+    s.el.setAttribute('r', isOut ? '5' : '4.5');
+    s.el.style.fill = isOut ? 'var(--rd)' : 'var(--cy)';
+    s.el.style.filter = isOut ? 'drop-shadow(0 0 10px var(--rdgl)) drop-shadow(0 0 20px rgba(251,92,92,.35))' : 'drop-shadow(0 0 8px var(--cygl)) drop-shadow(0 0 16px rgba(34,211,238,.3))';
+    s.el.style.offsetPath = `path("${pathD}")`;
+    s.el.style.offsetDistance = '0%';
+    s.el.style.opacity = '1';
+    if (!this.rafId) this._loop();
+  }
+  _loop() {
+    const tick = now => {
+      let any = false;
+      for (const s of this.pool) {
+        if (!s.inUse) continue;
+        any = true;
+        const p = Math.min((now - s.t0) / s.dur, 1);
+        s.el.style.offsetDistance = (p * 100) + '%';
+        s.el.style.opacity = p > 0.85 ? String(Math.max(0, 1 - (p-.85)/.15)) : '1';
+        if (p >= 1) { s.el.style.opacity = '0'; s.inUse = false; }
+      }
+      this.rafId = any ? requestAnimationFrame(tick) : null;
+    };
+    this.rafId = requestAnimationFrame(tick);
+  }
+  reset() {
+    for (const s of this.pool) { s.el.style.opacity='0'; s.inUse=false; }
+    if (this.rafId) { cancelAnimationFrame(this.rafId); this.rafId=null; }
+  }
+  destroy() {
+    this.reset();
+    for (const s of this.pool) s.el.remove();
+    this.pool = [];
+  }
+}
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  6. GATE DIAGRAM BUILDER                                     ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+function buildGateSVG(model) {
+  const terms = model.terms, n = terms.length;
+  const VY = {A:35,B:140,C:225,D:310}, VLAB = {A:'CPU',B:'VRM',C:'Mining',D:'Temp.'};
+  const IX = 55, WS = 70;
+  const AX = 330, AW = 110, AH = 52;
+  const OX = 580, OW = 110;
+  const SX = 800, SW = 84, SCX = 842;
+  const RX = {A:120,B:262,C:274,D:286}; // routing columns — A routes wide above circuit
+  const MRX = 495; // mid route AND→OR
+
+  // Classify terms
+  const andGates = [], directTerms = [];
+  terms.forEach((t,i) => {
+    if (t.literals.length > 1) {
+      const ys = t.literals.map(l => VY[l.name]);
+      const cy = Math.round(ys.reduce((a,b)=>a+b,0)/ys.length);
+      andGates.push({ ti:i, term:t, y:cy - AH/2, cy, color:model.color(i) });
+    } else {
+      directTerms.push({ ti:i, term:t, lit:t.literals[0], vy:VY[t.literals[0].name], color:model.color(i) });
+    }
+  });
+  // Resolve overlapping AND gates
+  andGates.sort((a,b)=>a.cy-b.cy);
+  for (let i=1;i<andGates.length;i++) {
+    if (andGates[i].y < andGates[i-1].y + AH + 18) {
+      andGates[i].y = andGates[i-1].y + AH + 18;
+      andGates[i].cy = andGates[i].y + AH/2;
+    }
+  }
+
+  // SVG height
+  let maxY = 340;
+  andGates.forEach(g => maxY = Math.max(maxY, g.y + AH + 30));
+  const svgH = Math.max(380, maxY + 30);
+
+  // OR gate sizing
+  const allOY = andGates.map(g=>g.cy).concat(directTerms.map(d=>d.vy));
+  allOY.sort((a,b)=>a-b);
+  const needsOR = n > 1;
+  let orCY, orH, orY;
+  if (needsOR) {
+    orCY = Math.round(allOY.reduce((a,b)=>a+b,0)/allOY.length);
+    orH = Math.max(66, n * 26 + 22);
+    orY = Math.round(orCY - orH/2);
+  } else {
+    orCY = allOY[0] || 185;
+    orH = 66; orY = orCY - 33;
+  }
+  // OR input ports
+  const orPorts = [];
+  for (let i=0;i<n;i++) orPorts.push(needsOR ? Math.round(orY + (i+.5)*orH/n) : orCY);
+  // Map term index → OR port (same order as terms)
+  const t2port = {};
+  for (let i=0;i<n;i++) t2port[i] = orPorts[i];
+
+  const outCY = needsOR ? orCY : (andGates[0]?.cy ?? directTerms[0]?.vy ?? 185);
+
+  // Wire metadata for update & dots
+  const wires = []; // {id, type, variable?, termIndex?, pathD}
+  let wc = 0;
+  let defs = '', base = '', highlight = '', flow = '', elems = '', nodes = '', labels = '', juncs = '';
+
+  // SVG defs: HOLOGRAPHIC NEON gates (translucent glass with cyan / violet / red tints)
+  defs += `<linearGradient id="gateGradAND" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="rgba(34,211,238,.12)"/>
+    <stop offset="50%" stop-color="rgba(14,22,38,.82)"/>
+    <stop offset="100%" stop-color="rgba(8,14,24,.88)"/>
+  </linearGradient>\n`;
+  defs += `<linearGradient id="gateGradOR" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="rgba(167,139,250,.12)"/>
+    <stop offset="50%" stop-color="rgba(14,18,38,.82)"/>
+    <stop offset="100%" stop-color="rgba(8,12,24,.88)"/>
+  </linearGradient>\n`;
+  defs += `<linearGradient id="gateGradOut" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="rgba(251,92,92,.14)"/>
+    <stop offset="50%" stop-color="rgba(24,10,14,.82)"/>
+    <stop offset="100%" stop-color="rgba(14,6,10,.88)"/>
+  </linearGradient>\n`;
+  // Under-glow gradients — stronger neon halos
+  defs += `<radialGradient id="glowAND" cx="50%" cy="100%" r="75%" fx="50%" fy="80%">
+    <stop offset="0%" stop-color="rgba(34,211,238,.5)"/>
+    <stop offset="45%" stop-color="rgba(34,211,238,.12)"/>
+    <stop offset="100%" stop-color="rgba(34,211,238,0)"/>
+  </radialGradient>\n`;
+  defs += `<radialGradient id="glowOR" cx="50%" cy="100%" r="75%" fx="50%" fy="80%">
+    <stop offset="0%" stop-color="rgba(251,92,92,.5)"/>
+    <stop offset="45%" stop-color="rgba(251,92,92,.14)"/>
+    <stop offset="100%" stop-color="rgba(251,92,92,0)"/>
+  </radialGradient>\n`;
+  // Neutralize fake 3D — emboss and bottomShadow become near-invisible
+  defs += `<linearGradient id="embossHL" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="rgba(255,255,255,.06)"/>
+    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+  </linearGradient>\n`;
+  defs += `<linearGradient id="bottomShadow" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,.08)"/>
+  </linearGradient>\n`;
+  // Minimal "bevel" filter — reduced specular so blocks look like neon glass, not chips
+  defs += `<filter id="chipBevel" x="-10%" y="-10%" width="120%" height="120%">
+    <feGaussianBlur in="SourceAlpha" stdDeviation=".8" result="blur"/>
+    <feSpecularLighting in="blur" surfaceScale="1.5" specularConstant=".15" specularExponent="24" result="spec">
+      <fePointLight x="-100" y="-200" z="300"/>
+    </feSpecularLighting>
+    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specIn"/>
+    <feComposite in="SourceGraphic" in2="specIn" operator="arithmetic" k1="0" k2="1" k3=".15" k4="0"/>
+  </filter>\n`;
+
+  function addWire(d, type, variable, termIndex) {
+    const id = wc++;
+    defs += `<path id="gp${id}" d="${d}"/>\n`;
+    base += `<use href="#gp${id}" class="wire" id="gw${id}"/>\n`;
+    highlight += `<use href="#gp${id}" class="wire-highlight" id="gwh${id}"/>\n`;
+    flow += `<use href="#gp${id}" class="wire-flow" id="gfw${id}"/>\n`;
+    wires.push({ id, type, variable, termIndex, pathD: d });
+  }
+
+  // Variable destinations
+  const vDest = {A:[],B:[],C:[],D:[]};
+  andGates.forEach(g => {
+    g.term.literals.forEach((l,li) => {
+      const portY = Math.round(g.y + (li+.5)*AH/g.term.literals.length);
+      vDest[l.name].push({ type:'and', y:portY, gateIdx:g.ti });
+    });
+  });
+  directTerms.forEach(d => {
+    const portY = t2port[d.ti];
+    const routeToX = needsOR ? OX : SX;
+    vDest[d.lit.name].push({ type:'direct', y:portY, termIdx:d.ti, destX:routeToX });
+  });
+
+  SENSOR_KEYS.forEach(v => {
+    const dests = vDest[v];
+    if (dests.length === 0) return;
+    const vy = VY[v], rx = RX[v];
+    if (v === 'A') {
+      const topY = 12;
+      if (dests.length === 1) {
+        const d = dests[0];
+        const dx = d.type === 'and' ? AX : (d.destX || OX);
+        const dy = d.y;
+        const pathD = `M${WS},${vy} L${rx},${vy} L${rx},${topY} L${dx - 10},${topY} L${dx - 10},${dy} L${dx},${dy}`;
+        addWire(pathD, 'varInput', v, null);
+      } else {
+        addWire(`M${WS},${vy} L${rx},${vy}`, 'varInput', v, null);
+        juncs += `<circle class="junc" id="j${v}" cx="${rx}" cy="${vy}" r="4.5"/>\n`;
+        dests.forEach((d,di) => {
+          const dx = d.type === 'and' ? AX : (d.destX || OX);
+          const dy = d.y;
+          const branchX = rx + (di + 1) * 12;
+          const pathD = `M${rx},${vy} L${rx},${topY} L${branchX + (dx - rx)},${topY} L${branchX + (dx - rx)},${dy} L${dx},${dy}`;
+          addWire(pathD, 'varInput', v, null);
+        });
+      }
+      return;
+    }
+    if (dests.length === 1) {
+      const d = dests[0];
+      const dx = d.type === 'and' ? AX : (d.destX || OX);
+      const dy = d.y;
+      const pathD = dy === vy ? `M${WS},${vy} L${dx},${vy}` : `M${WS},${vy} L${rx},${vy} L${rx},${dy} L${dx},${dy}`;
+      addWire(pathD, 'varInput', v, null);
+    } else {
+      addWire(`M${WS},${vy} L${rx},${vy}`, 'varInput', v, null);
+      juncs += `<circle class="junc" id="j${v}" cx="${rx}" cy="${vy}" r="4.5"/>\n`;
+      dests.forEach((d,di) => {
+        const dx = d.type === 'and' ? AX : (d.destX || OX);
+        const dy = d.y;
+        const pathD = dy === vy ? `M${rx},${vy} L${dx},${dy}` : `M${rx},${vy} L${rx},${dy} L${dx},${dy}`;
+        addWire(pathD, 'varInput', v, null);
+      });
+    }
+  });
+
+  andGates.forEach(g => {
+    elems += `<rect class="gate-underglow" id="ugAND${g.ti}" x="${AX-8}" y="${g.y-6}" width="${AW+16}" height="${AH+14}" rx="16" fill="url(#glowAND)" filter="blur(3px)"/>\n`;
+    elems += `<rect x="${AX+2}" y="${g.y+3}" width="${AW}" height="${AH}" rx="8" fill="rgba(0,0,0,.35)" filter="blur(3px)" class="gate-inner"/>\n`;
+    elems += `<rect id="gAND${g.ti}" class="gate-shape" x="${AX}" y="${g.y}" width="${AW}" height="${AH}" rx="8" fill="url(#gateGradAND)" filter="url(#chipBevel)"/>\n`;
+    elems += `<rect class="gate-emboss" x="${AX}" y="${g.y}" width="${AW}" height="${Math.round(AH*0.45)}" rx="8" fill="url(#embossHL)"/>\n`;
+    elems += `<rect class="gate-inner" x="${AX}" y="${g.y}" width="${AW}" height="${AH}" rx="8" fill="url(#bottomShadow)"/>\n`;
+    elems += `<rect class="gate-inner" x="${AX+1.5}" y="${g.y+1.5}" width="${AW-3}" height="${AH-3}" rx="6.5" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>\n`;
+    elems += `<rect class="gate-inner" x="${AX+.5}" y="${g.y+.5}" width="${AW-1}" height="${AH-1}" rx="7.5" fill="none" stroke="rgba(0,0,0,.3)" stroke-width=".6"/>\n`;
+    for (let pi=0; pi<g.term.literals.length; pi++) {
+      const pinY = Math.round(g.y + (pi+.5)*AH/g.term.literals.length);
+      elems += `<rect x="${AX-4}" y="${pinY-3}" width="8" height="6" rx="1.5" fill="rgba(74,94,122,.5)" stroke="rgba(0,0,0,.3)" stroke-width=".5" class="gate-inner"/>\n`;
+    }
+    elems += `<rect x="${AX+AW-4}" y="${g.cy-3}" width="8" height="6" rx="1.5" fill="rgba(74,94,122,.5)" stroke="rgba(0,0,0,.3)" stroke-width=".5" class="gate-inner"/>\n`;
+    elems += `<text id="glAND${g.ti}" class="gate-lbl" x="${AX+AW/2}" y="${g.cy+5}" text-anchor="middle">AND</text>\n`;
+    const sub = g.term.literals.map(l => l.negated ? l.name+'\u0304' : l.name).join(' · ');
+    elems += `<text class="gate-sub" x="${AX+AW/2}" y="${g.y+AH+16}" text-anchor="middle">${sub}</text>\n`;
+    g.term.literals.forEach((l,li) => {
+      if (l.negated) {
+        const py = Math.round(g.y + (li+.5)*AH/g.term.literals.length);
+        elems += `<circle class="neg-bub" data-var="${l.name}" cx="${AX-6}" cy="${py}" r="4.5"/>\n`;
+      }
+    });
+    const portY = t2port[g.ti];
+    const destX = needsOR ? OX : SX;
+    const d = g.cy === portY ? `M${AX+AW},${g.cy} L${destX},${portY}` : `M${AX+AW},${g.cy} L${MRX},${g.cy} L${MRX},${portY} L${destX},${portY}`;
+    addWire(d, 'andOutput', null, g.ti);
+  });
+
+  if (needsOR) {
+    elems += `<rect class="gate-underglow" id="ugOR" x="${OX-8}" y="${orY-6}" width="${OW+16}" height="${orH+14}" rx="20" fill="url(#glowOR)" filter="blur(3px)"/>\n`;
+    elems += `<rect x="${OX+2}" y="${orY+3}" width="${OW}" height="${orH}" rx="10" fill="rgba(0,0,0,.35)" filter="blur(3px)" class="gate-inner"/>\n`;
+    elems += `<rect id="gOR" class="gate-shape" x="${OX}" y="${orY}" width="${OW}" height="${orH}" rx="10" fill="url(#gateGradOR)" filter="url(#chipBevel)"/>\n`;
+    elems += `<rect class="gate-emboss" x="${OX}" y="${orY}" width="${OW}" height="${Math.round(orH*0.35)}" rx="10" fill="url(#embossHL)"/>\n`;
+    elems += `<rect class="gate-inner" x="${OX}" y="${orY}" width="${OW}" height="${orH}" rx="10" fill="url(#bottomShadow)"/>\n`;
+    elems += `<rect class="gate-inner" x="${OX+1.5}" y="${orY+1.5}" width="${OW-3}" height="${orH-3}" rx="8.5" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>\n`;
+    elems += `<rect class="gate-inner" x="${OX+.5}" y="${orY+.5}" width="${OW-1}" height="${orH-1}" rx="9.5" fill="none" stroke="rgba(0,0,0,.3)" stroke-width=".6"/>\n`;
+    for (let pi=0; pi<n; pi++) {
+      const pinY = Math.round(orY + (pi+.5)*orH/n);
+      elems += `<rect x="${OX-4}" y="${pinY-3}" width="8" height="6" rx="1.5" fill="rgba(74,94,122,.5)" stroke="rgba(0,0,0,.3)" stroke-width=".5" class="gate-inner"/>\n`;
+    }
+    elems += `<rect x="${OX+OW-4}" y="${orCY-3}" width="8" height="6" rx="1.5" fill="rgba(74,94,122,.5)" stroke="rgba(0,0,0,.3)" stroke-width=".5" class="gate-inner"/>\n`;
+    elems += `<text id="glOR" class="gate-lbl" x="${OX+OW/2}" y="${orCY+5}" text-anchor="middle" font-size="14">OR</text>\n`;
+    const orSub = model.expression.length > 20 ? model.expression.substring(0,18)+'…' : model.expression;
+    elems += `<text class="gate-sub" x="${OX+OW/2}" y="${orY+orH+18}" text-anchor="middle">${orSub}</text>\n`;
+    addWire(`M${OX+OW},${orCY} L${SX},${outCY}`, 'output', null, null);
+  }
+
+  // Output node (3D industrial microchip)
+  elems += `<circle class="out-pulse" id="outP" cx="${SCX}" cy="${outCY}" r="24"/>\n`;
+  // Under-glow
+  elems += `<rect class="gate-underglow" id="ugOut" x="${SX-8}" y="${outCY-30}" width="${SW+16}" height="62" rx="18" fill="url(#glowOR)" filter="blur(3px)"/>\n`;
+  // Outer shadow
+  elems += `<rect x="${SX+2}" y="${outCY-21}" width="${SW}" height="48" rx="8" fill="rgba(0,0,0,.35)" filter="blur(3px)" class="gate-inner"/>\n`;
+  // Main chip body
+  elems += `<rect id="gOut" class="gate-shape" x="${SX}" y="${outCY-24}" width="${SW}" height="48" rx="8" fill="url(#gateGradOut)" filter="url(#chipBevel)"/>\n`;
+  // Top emboss
+  elems += `<rect class="gate-emboss" x="${SX}" y="${outCY-24}" width="${SW}" height="18" rx="8" fill="url(#embossHL)"/>\n`;
+  // Bottom shadow
+  elems += `<rect class="gate-inner" x="${SX}" y="${outCY-24}" width="${SW}" height="48" rx="8" fill="url(#bottomShadow)"/>\n`;
+  // Inner border bevel
+  elems += `<rect class="gate-inner" x="${SX+1.5}" y="${outCY-22.5}" width="${SW-3}" height="45" rx="6.5" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>\n`;
+  elems += `<rect class="gate-inner" x="${SX+.5}" y="${outCY-23.5}" width="${SW-1}" height="47" rx="7.5" fill="none" stroke="rgba(0,0,0,.3)" stroke-width=".6"/>\n`;
+  // Chip pin marks
+  elems += `<rect x="${SX-4}" y="${outCY-3}" width="8" height="6" rx="1.5" fill="rgba(74,94,122,.5)" stroke="rgba(0,0,0,.3)" stroke-width=".5" class="gate-inner"/>\n`;
+  labels += `<text id="glOut" class="gate-lbl" x="${SCX}" y="${outCY+5}" text-anchor="middle" font-size="14">S</text>\n`;
+
+
+  SENSOR_KEYS.forEach(v => {
+    const y = VY[v];
+    nodes += `<g class="in-node" id="n${v}"><circle class="ring" cx="${IX}" cy="${y}" r="16"/><circle class="core" cx="${IX}" cy="${y}" r="6.5"/></g>\n`;
+    labels += `<text class="in-lbl" id="ln${v}" x="${IX}" y="${y+5}" text-anchor="middle">${v}</text>\n`;
+    labels += `<text class="in-sub" x="${IX}" y="${y+28}" text-anchor="middle">${VLAB[v]}</text>\n`;
+  });
+
+  const dotsG = '<g id="dots-layer"></g>';
+  const svg = `<defs>${defs}</defs>${base}${highlight}${flow}${juncs}${elems}${nodes}${labels}${dotsG}`;
+  return { svg, svgH, wires, needsOR, outCY };
+}
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  7. VIEW — All rendering and update logic                    ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+let model, dotPool, gateInfo, showGroups = true, prevS = false;
+
+// ── Build formula bar ──
+function buildFormulaBar() {
+  let h = '<span class="feq">S =</span>';
+  model.terms.forEach((_,i) => {
+    h += `<span class="ft" id="fT${i}">${model.termDisplayHTML(i)}</span>`;
+    if (i < model.terms.length-1) h += '<span class="fop">+</span>';
+  });
+  document.getElementById('formulaBar').innerHTML = h;
+}
+
+// ── Build Karnaugh Map ──
+function buildKMap() {
+  const km = document.getElementById('km');
+  let h = '<div class="hdr corner" role="columnheader">AB\\CD</div>';
+  gray.forEach(c => h += `<div class="hdr" role="columnheader">${c}</div>`);
+  gray.forEach(ab => {
+    h += `<div class="hdr" role="rowheader">${ab}</div>`;
+    gray.forEach(cd => {
+      const id = ab+cd, v = id.split('').map(Number), s = model.evaluate(...v);
+      h += `<div class="cell v${s}" data-id="${id}" role="gridcell" aria-label="A=${v[0]} B=${v[1]} C=${v[2]} D=${v[3]}, S=${s}" onclick="ripC(event,this)">${s}<span class="tip">A=${v[0]} B=${v[1]} C=${v[2]} D=${v[3]} → S=${s}</span><span class="crip"></span></div>`;
+    });
+  });
+  km.innerHTML = h;
+}
+
+function paintGroups() {
+  const km = document.getElementById('km');
+  km.classList.toggle('ng', !showGroups);
+  if (!showGroups) { km.querySelectorAll('.cell').forEach(c => { c.style.background=''; c.style.borderColor=''; }); return; }
+  km.querySelectorAll('.cell').forEach(c => {
+    const id = c.dataset.id;
+    const gIndices = [];
+    for (let t=0;t<model.terms.length;t++) { if (model.groups['g'+t]?.includes(id)) gIndices.push(t); }
+    if (gIndices.length === 0) { c.style.background=''; c.style.borderColor=''; }
+    else if (gIndices.length === 1) {
+      const cl = model.color(gIndices[0]);
+      c.style.background = cl.bg; c.style.borderColor = cl.border;
+    } else {
+      const bgs = gIndices.map(i => model.color(i).bg);
+      c.style.background = `linear-gradient(135deg,${bgs.join(',')})`;
+      c.style.borderColor = model.color(gIndices[0]).border;
+    }
+  });
+}
+
+function setView(m, btn) {
+  showGroups = m === 'g';
+  document.querySelectorAll('.kvt button').forEach(button => button.classList.remove('active'));
+  btn.classList.add('active');
+  paintGroups();
+}
+
+// ── Build legend ──
+function buildLegend() {
+  let h = '';
+  model.terms.forEach((_,i) => {
+    const cl = model.color(i);
+    const cnt = (model.groups['g'+i]||[]).length;
+    const gt = cnt>=8?'Octeto':cnt>=4?'Quadra':cnt>=2?'Par':'Unitário';
+    h += `<div class="lg"><span class="ld" style="border-color:${cl.base};background:${cl.bg}"></span> ${model.termDisplayText(i)} (${gt})</div>`;
+  });
+  document.getElementById('kLegend').innerHTML = h;
+}
+
+// ── Build truth table ──
+function buildTruthTable() {
+  const tb = document.getElementById('ttb');
+  let h = '';
+  for (const row of model.truthTable) {
+    const ruleText = row.activeTerms.length ?
+      row.activeTerms.map(i => 'R'+(i+1)).join('+') : '—';
+    h += `<tr data-bin="${row.binary}"><td style="color:var(--tm);font-size:.6rem">${row.index}</td><td>${row.A}</td><td>${row.B}</td><td>${row.C}</td><td>${row.D}</td><td class="${row.S?'s1':'s0'}">${row.S}</td><td><span class="rt">${ruleText}</span></td></tr>`;
+  }
+  tb.innerHTML = h;
+}
+
+// ── Build gate diagram ──
+function buildGateDiagram() {
+  if (dotPool) dotPool.destroy();
+  const svg = document.getElementById('gateSvg');
+  gateInfo = buildGateSVG(model);
+  svg.setAttribute('viewBox', `0 0 920 ${gateInfo.svgH}`);
+  svg.innerHTML = gateInfo.svg;
+  const dotsLayer = document.getElementById('dots-layer');
+  dotPool = new DotPool(dotsLayer, 24);
+}
+
+// ── Build canonical ──
+function buildCanonical() {
+  const mc = model.mintermCount, tc = model.terms.length;
+  const red = mc > 0 ? Math.round((1 - tc/mc) * 100) : 0;
+  const ands = model.terms.filter(t => t.literals.length > 1).length;
+  const ors = tc > 1 ? 1 : 0;
+  document.getElementById('canonDesc').textContent =
+    `Soma de ${mc} mintermos reduzida a ${tc} termos pelo Mapa de Karnaugh`;
+
+  let h = '';
+  // Expanded (canonical SOP)
+  h += '<div class="canon-box expanded"><div class="canon-label">Forma Canônica (SOP) <span class="tag">'+mc+' mintermos</span></div><div class="canon-terms">';
+  const minterms = model.truthTable.filter(r => r.S === 1);
+  minterms.forEach((m,i) => {
+    const litH = SENSOR_KEYS.map((v,j) => m.binary[j]==='0' ? `<span class="bar">${v}</span>` : v).join('');
+    h += `<span class="mterm" data-mt="${m.binary}">${litH}</span>`;
+    if (i < minterms.length-1) h += '<span class="mterm-plus">+</span>';
+  });
+  h += '</div></div>';
+
+  // Arrow
+  h += '<div class="canon-arrow"><svg viewBox="0 0 40 40" fill="none"><path d="M8 20H32M32 20L24 12M32 20L24 28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Karnaugh</span></div>';
+
+  // Simplified
+  h += '<div class="canon-box simplified"><div class="canon-label">Forma Simplificada <span class="tag">'+tc+' termos</span></div>';
+  h += '<div class="canon-simp-terms"><span class="feq" style="color:var(--tm)">S =</span>';
+  model.terms.forEach((_,i) => {
+    const cl = model.color(i);
+    h += `<span class="sft" id="csT${i}" style="border-color:${cl.border};background:${cl.bg};color:${cl.base}">${model.termDisplayHTML(i)}</span>`;
+    if (i < tc-1) h += '<span class="sfop">+</span>';
+  });
+  h += '</div>';
+  h += '<div class="canon-stats">';
+  h += `<div class="stat"><span class="stat-val bad">${mc}</span><span class="stat-lbl">Mintermos</span></div>`;
+  h += `<div class="stat"><span class="stat-val good">${tc}</span><span class="stat-lbl">Termos</span></div>`;
+  h += `<div class="stat"><span class="stat-val good">${red}%</span><span class="stat-lbl">Redução</span></div>`;
+  h += `<div class="stat"><span class="stat-val good">${ands}+${ors}</span><span class="stat-lbl">ANDs+OR</span></div>`;
+  h += '</div></div>';
+
+  document.getElementById('canonCompare').innerHTML = h;
+}
+
+// ── Build explainer ──
+function buildExplainer() {
+  let h = '';
+  model.terms.forEach((t,i) => {
+    const cl = model.color(i);
+    const cnt = (model.groups['g'+i]||[]).length;
+    const gt = cnt>=8?'Octeto':cnt>=4?'Quadra':cnt>=2?'Par':'Unitário';
+    const used = t.literals.map(l=>l.name);
+    const elim = SENSOR_KEYS.filter(v=>!used.includes(v));
+    const elimDesc = elim.length > 0 ?
+      `${elim.join(', ')} ${elim.length===1?'varia':'variam'} → ${elim.length===1?'eliminada':'eliminadas'}.` :
+      'Nenhuma variável eliminada.';
+    const condDesc = t.literals.map(l => `<code>${l.name}=${l.negated?'0':'1'}</code>`).join(' e ');
+    h += `<div class="step" style="--hud-acc:${cl.base};--hud-acc-gl:${cl.glow};--hud-acc-d:${cl.border}">`;
+    h += `<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,${cl.base},transparent);opacity:.6"></div>`;
+    h += `<div class="step-meta"><span class="step-num">// ${String(i+1).padStart(2,'0')} //</span><span class="step-type">${gt}</span></div>`;
+    h += `<h4 style="color:${cl.base}">● ${model.termDisplayText(i)}</h4>`;
+    h += `<p>Engloba as <strong>${cnt} células</strong> onde ${condDesc}. ${elimDesc}</p>`;
+    h += `<div class="res" style="color:${cl.base};background:${cl.bg}">Termo: ${model.termDisplayText(i)}</div></div>`;
+  });
+  document.getElementById('explainerSteps').innerHTML = h;
+}
+
+// ── Update hero & footer ──
+function updateTexts() {
+  document.getElementById('heroExpr').textContent = 'S = ' + model.expression;
+  document.getElementById('footExpr').textContent = 'S = ' + model.expression;
+}
+
+// ── Full rebuild (expression changed) ──
+function rebuildAll() {
+  buildFormulaBar();
+  buildKMap();
+  paintGroups();
+  buildLegend();
+  buildTruthTable();
+  buildGateDiagram();
+  buildCanonical();
+  buildExplainer();
+  updateTexts();
+  update();
+}
+
+// ── Update (sensor state changed) ──
+function update() {
+  const {A,B,C,D} = model.sensors;
+  const a=A?1:0, b=B?1:0, c=C?1:0, d=D?1:0, bin=''+a+b+c+d;
+  const S = model.S, at = model.curActiveTerms;
+
+  // Sensor rows
+  SENSOR_KEYS.forEach(v => document.getElementById('row-'+v).classList.toggle('active', model.sensors[v]));
+
+  // Binary display
+  [{id:'bA',v:A},{id:'bB',v:B},{id:'bC',v:C},{id:'bD',v:D}].forEach(x => {
+    const el = document.getElementById(x.id);
+    el.className = 'bin-bit '+(x.v?'on':'off');
+    el.querySelector('.bv').textContent = x.v?'1':'0';
+  });
+  const bS = document.getElementById('bS');
+  bS.className = 'bin-out '+(S?'on':'off');
+  bS.textContent = S?'1':'0';
+
+  // Formula bar highlights
+  model.terms.forEach((_,i) => {
+    const el = document.getElementById('fT'+i); if(!el) return;
+    const active = at.includes(i), cl = model.color(i);
+    if (active) {
+      el.style.color = cl.base; el.style.borderColor = cl.base;
+      el.style.background = cl.bg; el.style.boxShadow = `0 0 16px ${cl.glow}`;
+    } else {
+      el.style.color = ''; el.style.borderColor = ''; el.style.background = ''; el.style.boxShadow = '';
+    }
+  });
+
+  // Fan
+  const fb = document.getElementById('fbox');
+  fb.className = 'fan-box '+(S?'on':'off');
+  document.getElementById('flbl').textContent = S?'Exaustor Ligado':'Sistema Seguro';
+  document.getElementById('fbl').classList.toggle('spin', !!S);
+  document.querySelectorAll('.pt').forEach(p => p.classList.toggle('active', !!S));
+
+  // Gauge ring — uses pathLength="360" for perfect circle math
+  const gauge = document.getElementById('gauge');
+  const rc = at.length;
+  const totalTerms = Math.max(model.terms.length, 1);
+  const fillRatio = S ? (rc / totalTerms) * 0.95 : 0;
+  const dashOffset = S ? 360 * (1 - fillRatio) : 360;
+  gauge.style.strokeDashoffset = dashOffset;
+
+  // If all terms active (alert max) → close the circle completely (0 offset = 360°) and pulse
+  if (S && rc >= totalTerms) {
+    gauge.style.strokeDashoffset = '0';
+    gauge.classList.add('alert-max');
+  } else {
+    gauge.classList.remove('alert-max');
+  }
+
+  if (S && !prevS) { fb.classList.add('shake'); setTimeout(()=>fb.classList.remove('shake'),400); }
+  prevS = !!S;
+  const rules = at.map(i => `Regra ${i+1} — ${model.termLabel(i)}`);
+  document.getElementById('frule').textContent = rules.length ? rules.join(' · ') : 'Nenhuma regra acionada';
+  fb.setAttribute('aria-label', S ? `Exaustor ligado. ${rules.join('. ')}.` : 'Estado do exaustor: Sistema seguro');
+
+  // KMap highlight
+  document.querySelectorAll('.km .cell').forEach(c => { c.classList.remove('cur'); c.removeAttribute('aria-current'); });
+  const ac = document.querySelector(`.km .cell[data-id="${bin}"]`);
+  if (ac) { ac.classList.add('cur'); ac.setAttribute('aria-current','true'); }
+
+  // Table highlight
+  document.querySelectorAll('.tt tbody tr').forEach(tr => { tr.classList.remove('cur'); tr.removeAttribute('aria-current'); });
+  const atr = document.querySelector(`.tt tbody tr[data-bin="${bin}"]`);
+  if (atr) { atr.classList.add('cur'); atr.setAttribute('aria-current','true'); atr.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+
+  // Gate diagram states
+  updateGates(at, S);
+
+  // Canonical highlights
+  document.querySelectorAll('.mterm').forEach(m => m.classList.toggle('active', m.dataset.mt === bin));
+  model.terms.forEach((_,i) => {
+    const el = document.getElementById('csT'+i); if(!el) return;
+    const active = at.includes(i), cl = model.color(i);
+    el.style.borderColor = active ? cl.base : cl.border;
+    el.style.boxShadow = active ? `0 0 14px ${cl.glow}` : '';
+  });
+
+  // SR announcement
+  srAnnounce(S, at);
+}
+
+// ── Update gate diagram states ──
+function updateGates(at, S) {
+  if (!gateInfo) return;
+  const sens = model.sensors;
+
+  // Input nodes
+  SENSOR_KEYS.forEach(v => {
+    const on = sens[v];
+    const nd = document.getElementById('n'+v); if(nd) nd.className.baseVal = 'in-node'+(on?' on':'');
+    const lb = document.getElementById('ln'+v); if(lb) lb.className.baseVal = 'in-lbl'+(on?' on':'');
+  });
+
+  // Wires (including highlight layer)
+  gateInfo.wires.forEach(w => {
+    let hot = false, isOut = false;
+    if (w.type === 'varInput') hot = !!sens[w.variable];
+    else if (w.type === 'andOutput') hot = at.includes(w.termIndex);
+    else if (w.type === 'output') { hot = !!S; isOut = true; }
+    const we = document.getElementById('gw'+w.id);
+    const he = document.getElementById('gwh'+w.id);
+    const fe = document.getElementById('gfw'+w.id);
+    if (we) we.className.baseVal = 'wire'+(hot ? (isOut?' hot-out':' hot') : '');
+    if (he) he.className.baseVal = 'wire-highlight'+(hot ? (isOut?' hot-out':' hot') : '');
+    if (fe) fe.className.baseVal = 'wire-flow'+(hot ? (isOut?' hot-out':' hot') : '');
+  });
+
+  // Junctions
+  SENSOR_KEYS.forEach(v => {
+    const j = document.getElementById('j'+v); if(j) j.className.baseVal = 'junc'+(sens[v]?' on':'');
+  });
+
+  // Negation bubbles
+  document.querySelectorAll('.neg-bub').forEach(nb => {
+    const v = nb.getAttribute('data-var');
+    nb.className.baseVal = 'neg-bub'+(sens[v]?' on':'');
+  });
+
+  // AND gates + under-glow
+  model.terms.forEach((t,i) => {
+    if (t.literals.length <= 1) return;
+    const active = at.includes(i);
+    const g = document.getElementById('gAND'+i); if(g) g.className.baseVal = 'gate-shape'+(active?' active':'');
+    const l = document.getElementById('glAND'+i); if(l) l.className.baseVal = 'gate-lbl'+(active?' active':'');
+    const ug = document.getElementById('ugAND'+i); if(ug) ug.className.baseVal = 'gate-underglow'+(active?' active':'');
+  });
+
+  // OR gate + under-glow
+  const og = document.getElementById('gOR'); if(og) og.className.baseVal = 'gate-shape'+(S?' active-out':'');
+  const ol = document.getElementById('glOR'); if(ol) ol.className.baseVal = 'gate-lbl'+(S?' active-out':'');
+  const ugor = document.getElementById('ugOR'); if(ugor) ugor.className.baseVal = 'gate-underglow'+(S?' active-out':'');
+
+  // Output + under-glow
+  const go = document.getElementById('gOut'); if(go) go.className.baseVal = 'gate-shape'+(S?' active-out':'');
+  const lo = document.getElementById('glOut'); if(lo) lo.className.baseVal = 'gate-lbl'+(S?' active-out':'');
+  const ugout = document.getElementById('ugOut'); if(ugout) ugout.className.baseVal = 'gate-underglow'+(S?' active-out':'');
+  const op = document.getElementById('outP'); if(op) op.className.baseVal = 'out-pulse'+(S?' on':'');
+}
+
+// ── Fire traveling dots ──
+function fireDots() {
+  if (!dotPool || !gateInfo) return;
+  const sens = model.sensors, at = model.curActiveTerms, S = model.S;
+  gateInfo.wires.forEach(w => {
+    let fire = false, delay = 0, speed = .8, isOut = false;
+    if (w.type === 'varInput' && sens[w.variable]) { fire=true; delay=50; speed=.8; }
+    else if (w.type === 'andOutput' && at.includes(w.termIndex)) { fire=true; delay=500; speed=.6; }
+    else if (w.type === 'output' && S) { fire=true; delay=900; speed=.5; isOut=true; }
+    if (fire) setTimeout(() => dotPool.fire(w.pathD, speed, isOut), delay);
+  });
+}
+
+// ── SR announcement ──
+let srTimeout;
+function srAnnounce(S, at) {
+  clearTimeout(srTimeout);
+  srTimeout = setTimeout(() => {
+    const el = document.getElementById('srAnnounce');
+    if (S) {
+      const rules = at.map(i => `Regra ${i+1}`).join(', ');
+      el.textContent = `Exaustor ligado. Regras ativas: ${rules}. Saída S igual a 1.`;
+    } else {
+      el.textContent = 'Sistema seguro. Exaustor desligado. Saída S igual a 0.';
+    }
+  }, 150);
+}
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  8. CONTROLLER — Event handlers                              ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+function handleSensor() {
+  model.setSensors(readSensorInputs());
+  update();
+}
+
+function setSc(a,b,c,d,btn) {
+  const sensorState = writeSensorInputs({ A:a, B:b, C:c, D:d });
+  updateScenarioButtons(btn);
+  model.setSensors(sensorState);
+  update();
+  fireDots();
+}
+
+function applyExpression() {
+  const input = document.getElementById('exprInput');
+  const errEl = document.getElementById('exprError');
+  try {
+    model.setExpression(input.value);
+    errEl.textContent = '';
+    input.classList.remove('error');
+    rebuildAll();
+  } catch(e) {
+    errEl.textContent = '⚠ ' + e.message;
+    input.classList.add('error');
+  }
+}
+
+function placeRipple(effect, event, container) {
+  const rect = container.getBoundingClientRect();
+  effect.style.left = (event.clientX - rect.left) + 'px';
+  effect.style.top = (event.clientY - rect.top) + 'px';
+  effect.style.width = effect.style.height = '10px';
+}
+
+function ripS(e, el) {
+  const ripple = document.createElement('span');
+  ripple.className = 'rip';
+  placeRipple(ripple, e, el);
+  el.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+
+function ripC(e, el) {
+  const ripple = el.querySelector('.crip');
+  ripple.classList.remove('go');
+  placeRipple(ripple, e, el);
+  void ripple.offsetWidth;
+  ripple.classList.add('go');
+  setTimeout(() => ripple.classList.remove('go'), 500);
+}
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║  9. INIT                                                     ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+window.addEventListener('DOMContentLoaded', () => {
+  model = new LogicModel();
+  model.setExpression('A + BC + CD');
+  rebuildAll();
+
+  // Expression input events
+  const exprInput = document.getElementById('exprInput');
+  const exprBtn = document.getElementById('exprApply');
+  exprBtn.addEventListener('click', applyExpression);
+  exprInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyExpression(); });
+  let debounceTimer;
+  exprInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const errEl = document.getElementById('exprError');
+      try { parseExpression(exprInput.value); errEl.textContent = ''; exprInput.classList.remove('error'); }
+      catch(e) { errEl.textContent = '⚠ ' + e.message; exprInput.classList.add('error'); }
+    }, 300);
+  });
+});
+</script>
+</body>
+</html>
